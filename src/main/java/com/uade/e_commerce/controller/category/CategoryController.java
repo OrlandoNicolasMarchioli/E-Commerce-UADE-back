@@ -18,9 +18,9 @@ import com.uade.e_commerce.dto.category.CategoryResponseDTO;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.service.CategoryService;
 
-// http://localhost:8080/api/categorias
+// http://localhost:8080/api/category
 @RestController
-@RequestMapping("/api/categorias")
+@RequestMapping("/api/category")
 public class CategoryController {
 
     private final CategoryService categoryService;

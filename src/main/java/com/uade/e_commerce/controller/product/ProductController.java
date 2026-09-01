@@ -25,9 +25,9 @@ import com.uade.e_commerce.service.UserService;
 
 
 
-// http://localhost:8080/api/productos
+// http://localhost:8080/api/products
 @RestController
-@RequestMapping("/api/productos")
+@RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -46,7 +46,7 @@ public class ProductController {
     }
 
 
-    // get http://localhost:8080/api/productos (orden alfabetico para la home)
+    // get http://localhost:8080/api/products (orden alfabetico para la home)
     @GetMapping()
     public List<ProductResponseDTO> getAllProducts() {
         return productService.getAllProducts().stream()
@@ -54,16 +54,16 @@ public class ProductController {
                 .collect(Collectors.toList());
     }
 
-    // get http://localhost:8080/api/productos/categoria/1
+    // get http://localhost:8080/api/products/category/1
     // Filtro por categoría, para la sección de "tipos de producto" de la home.
-    @GetMapping("/categoria/{categoryId}")
+    @GetMapping("/category/{categoryId}")
     public List<ProductResponseDTO> getProductsByCategory(@PathVariable Long categoryId) {
         return productService.getProductsByCategory(categoryId).stream()
                 .map(ProductResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    // get http://localhost:8080/api/productos/1
+    // get http://localhost:8080/api/products/1
     // Detalle de un producto puntual.
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
@@ -75,7 +75,7 @@ public class ProductController {
 
     }
 
-    // post http://localhost:8080/api/productos?publicadorId=1
+    // post http://localhost:8080/api/products?publicadorId=1
 
     // publicadorId va como query param (en vez de sacarlo de una sesión
     // logueada) porque todavía no existe el login en el proyecto.
@@ -106,7 +106,7 @@ public class ProductController {
         return ResponseEntity.ok(ProductResponseDTO.fromEntity(created));
     }
 
-    // put http://localhost:8080/api/productos/1
+    // put http://localhost:8080/api/products/1
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO dto) {
         Category category = categoryService.getCategoryById(dto.getCategoryId());
@@ -124,7 +124,7 @@ public class ProductController {
         return ResponseEntity.ok(ProductResponseDTO.fromEntity(updated));
     }
 
-    // delete http://localhost:8080/api/productos/1
+    // delete http://localhost:8080/api/products/1
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         boolean deleted = productService.deleteProduct(id);
