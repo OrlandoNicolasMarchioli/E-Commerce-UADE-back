@@ -27,7 +27,7 @@ import com.uade.e_commerce.service.UserService;
 
 // http://localhost:8080/api/productos
 @RestController
-@RequestMapping("/api/productos")
+@RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -132,5 +132,12 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build();
+    }
+
+    // post http://localhost:8080/api/productos
+    @PostMapping()
+    public ResponseEntity<ProductResponseDTO> saveProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+        Product product = productService.saveProduct(productRequestDTO.toEntity());
+        return ResponseEntity.ok(ProductResponseDTO.fromEntity(product));
     }
 }
