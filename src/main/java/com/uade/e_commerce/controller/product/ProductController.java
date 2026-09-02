@@ -133,4 +133,11 @@ public class ProductController {
         }
         return ResponseEntity.noContent().build();
     }
+
+    // post http://localhost:8080/api/productos
+    @PostMapping()
+    public ResponseEntity<ProductResponseDTO> saveProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+        Product product = productService.saveProduct(productRequestDTO.toEntity());
+        return ResponseEntity.ok(ProductResponseDTO.fromEntity(product));
+    }
 }
