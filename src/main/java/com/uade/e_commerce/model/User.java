@@ -24,10 +24,10 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
-    private String nombre;
+    private String name;
 
     @Column(nullable = false)
-    private String apellido;
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -35,11 +35,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String legajo;
+    private String regNumber; //legajo
 
     @Column(nullable = false)
-    private LocalDateTime fechaRegistro = LocalDateTime.now();
+    private LocalDateTime registrationDate = LocalDateTime.now();
 
     @Column(nullable = false)
-    private boolean habilitado = true;
+    private boolean isEnabled = true;
 }

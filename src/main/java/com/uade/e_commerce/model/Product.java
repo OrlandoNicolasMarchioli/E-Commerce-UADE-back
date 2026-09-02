@@ -18,22 +18,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "productos")
+@Table(name = "products")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
 
     @Column(nullable = false)
-    private String nombre;
+    private String name;
 
-    private String descripcion;
+    private String description;
 
     @Column(nullable = false)
-    private Double precio;
+    private Double price;
 
-    // EnumType.STRING guarda "FISICO"/"SERVICIO" como texto en la base,
+    // EnumType.STRING guarda "PHYSICAL"/"SERVICE" como texto en la base,
     // en vez de 0/1. Así si el día de mañana agregamos un tercer tipo,
     // no se rompen los datos ya guardados (con ORDINAL sí pasaría).
 
@@ -43,9 +44,9 @@ public class Product {
 
     private Integer stock;
 
-    private Integer duracionMinutos;
+    private Integer minutesDuration;
 
-    private String modalidad;
+    private String attendanceType;
 
     // Cada producto pertenece a una sola categoría (obligatorio).    
     @ManyToOne
@@ -55,6 +56,6 @@ public class Product {
     // El usuario que publicó el producto (el "vendedor"). Obligatorio:
     // todo producto tiene que tener un dueño.    
     @ManyToOne
-    @JoinColumn(name = "publicador_id", nullable = false)
-    private User publicador;
+    @JoinColumn(name = "publisher_id", nullable = false)
+    private User publisher;
 }

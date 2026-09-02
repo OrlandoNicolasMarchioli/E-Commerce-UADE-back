@@ -14,28 +14,28 @@ import lombok.NoArgsConstructor;
 public class ProductResponseDTO {
 
     private Long id;
-    private String nombre;
-    private String descripcion;
-    private Double precio;
+    private String name;
+    private String description;
+    private Double price;
     private ProductType type;
     private Integer stock;
-    private Integer duracionMinutos;
-    private String modalidad;
+    private Integer minutesDuration;
+    private String attendanceType;
     private CategoryResponseDTO category;
-    private Long publicadorId;
+    private Long publisherId;
 
     public static ProductResponseDTO fromEntity(Product product) {
         return new ProductResponseDTO(
                 product.getId(),
-                product.getNombre(),
-                product.getDescripcion(),
-                product.getPrecio(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
                 product.getType(),
                 product.getStock(),
-                product.getDuracionMinutos(),
-                product.getModalidad(),
+                product.getMinutesDuration(),
+                product.getAttendanceType(),
                 CategoryResponseDTO.fromEntity(product.getCategory()),
-                product.getPublicador().getId()
+                product.getPublisher().getId()
 
                     // Devolvemos la categoría completa (anidada), no solo el id, para
                     // que el frontend no tenga que hacer un segundo pedido para

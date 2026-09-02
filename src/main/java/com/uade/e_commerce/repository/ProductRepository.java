@@ -10,7 +10,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     // La usamos para la home, que pide el listado alfabético.
-    List<Product> findAllByOrderByNombreAsc();
+    List<Product> findAllByOrderByNameAsc();
 
     List<Product> findByCategoryId(Long categoryId);
 }

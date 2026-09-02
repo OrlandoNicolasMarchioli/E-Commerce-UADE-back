@@ -19,26 +19,26 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductRequestDTO {
 
-    private String nombre;
-    private String descripcion;
-    private Double precio;
+    private String name;
+    private String description;
+    private Double price;
     private ProductType type;
     private Integer stock;
-    private Integer duracionMinutos;
-    private String modalidad;
+    private Integer minutesDuration;
+    private String attendanceType;
     private Long categoryId;
 
     public Product toEntity() {
         Product product = new Product();
-        product.setNombre(nombre);
-        product.setDescripcion(descripcion);
-        product.setPrecio(precio);
+        product.setName(name);
+        product.setDescription(description);
+        product.setPrice(price);
         product.setType(type);
         product.setStock(stock);
-        product.setDuracionMinutos(duracionMinutos);
-        product.setModalidad(modalidad);
+        product.setMinutesDuration(minutesDuration);
+        product.setAttendanceType(attendanceType);
 
-        // category y publicador quedan sin setear a propósito: el
+        // category y publisher quedan sin setear a propósito: el
         // controller los completa después de buscarlos en la base.
         
         return product;

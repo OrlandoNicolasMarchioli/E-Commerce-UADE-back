@@ -19,14 +19,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "categorias")
+@Table(name = "categories")
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "category_id")
     private Long id;
 
     // unique=true porque no tiene sentido tener dos categorías con el mismo nombre
-    @Column(nullable = false, unique = true)
-    private String nombre;
+    @Column(name = "category_name", nullable = false, unique = true)
+    private String name;
+
+    private String description;
 }

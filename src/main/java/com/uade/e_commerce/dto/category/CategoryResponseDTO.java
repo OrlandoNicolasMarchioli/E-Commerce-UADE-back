@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 public class CategoryResponseDTO {
 
     private Long id;
-    private String nombre;
+    private String name;
 
     public static CategoryResponseDTO fromEntity(Category category) {
-        return new CategoryResponseDTO(category.getId(), category.getNombre());
+        return new CategoryResponseDTO(category.getId(), category.getName());
     }
 }

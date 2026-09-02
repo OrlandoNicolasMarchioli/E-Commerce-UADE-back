@@ -11,19 +11,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRequestDTO {
 
-    private String nombre;
-    private String apellido;
+    private String name;
+    private String lastName;
     private String email;
     private String password;
-    private String legajo;
+    private String regNumber; //legajo
 
     public User toEntity() {
         User user = new User();
-        user.setNombre(nombre);
-        user.setApellido(apellido);
+        user.setName(name);
+        user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(password);
-        user.setLegajo(legajo);
+        user.setRegNumber(regNumber);
         return user;
     }
 }

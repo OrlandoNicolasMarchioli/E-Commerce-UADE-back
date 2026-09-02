@@ -36,7 +36,7 @@ public class CategoryService {
         if (existing == null) {
             return null;
         }
-        existing.setNombre(category.getNombre());
+        existing.setName(category.getName());
         return categoryRepository.save(existing);
     }
 

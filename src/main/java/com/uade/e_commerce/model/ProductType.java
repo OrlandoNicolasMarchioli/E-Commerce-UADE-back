@@ -6,7 +6,7 @@ package com.uade.e_commerce.model;
  */
 
 public enum ProductType {
-    FISICO,
-    SERVICIO
+    PHYSICAL,
+    SERVICE
     
 }

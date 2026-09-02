@@ -75,9 +75,9 @@ public class ProductController {
 
     }
 
-    // post http://localhost:8080/api/products?publicadorId=1
+    // post http://localhost:8080/api/products?publisherId=1
 
-    // publicadorId va como query param (en vez de sacarlo de una sesión
+    // publisherId va como query param (en vez de sacarlo de una sesión
     // logueada) porque todavía no existe el login en el proyecto.
     // Cuando la parte del login esté lista, esto debería reemplazarse
     // por el id del usuario autenticado.
@@ -86,21 +86,21 @@ public class ProductController {
     @PostMapping()
     public ResponseEntity<ProductResponseDTO> createProduct(
             @RequestBody ProductRequestDTO dto,
-            @RequestParam Long publicadorId) {
+            @RequestParam Long publisherId) {
 
         // Validamos que la categoría y el usuario existan ANTES de crear
         // el producto, para no terminar con un producto "huérfano" o
         // con un error feo de integridad referencial en la base.
 
         Category category = categoryService.getCategoryById(dto.getCategoryId());
-        User publicador = userService.getUserById(publicadorId);
-        if (category == null || publicador == null) {
+        User publisher = userService.getUserById(publisherId);
+        if (category == null || publisher == null) {
             return ResponseEntity.badRequest().build();
         }
 
         Product product = dto.toEntity();
         product.setCategory(category);
-        product.setPublicador(publicador);
+        product.setPublisher(publisher);
 
         Product created = productService.createProduct(product);
         return ResponseEntity.ok(ProductResponseDTO.fromEntity(created));

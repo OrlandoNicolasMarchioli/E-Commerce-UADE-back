@@ -21,7 +21,7 @@ public class ProductService {
 
     public List<Product> getAllProducts() {
         // select * from productos
-        return productRepository.findAllByOrderByNombreAsc();
+        return productRepository.findAllByOrderByNameAsc();
     }
 
     public List<Product> getProductsByCategory(Long categoryId) {
@@ -45,13 +45,13 @@ public class ProductService {
 
         // Actualizamos campo por campo (en vez de reemplazar la entidad
         // entera) para no perder el id ni el publicador original.
-        existing.setNombre(product.getNombre());
-        existing.setDescripcion(product.getDescripcion());
-        existing.setPrecio(product.getPrecio());
+        existing.setName(product.getName());
+        existing.setDescription(product.getDescription());
+        existing.setPrice(product.getPrice());
         existing.setType(product.getType());
         existing.setStock(product.getStock());
-        existing.setDuracionMinutos(product.getDuracionMinutos());
-        existing.setModalidad(product.getModalidad());
+        existing.setMinutesDuration(product.getMinutesDuration());
+        existing.setAttendanceType(product.getAttendanceType());
         existing.setCategory(product.getCategory());
 
         // a propósito NO tocamos "publicador" acá. El dueño de un

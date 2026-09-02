@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryRequestDTO {
 
-    private String nombre;
+    private String name;
 
     public Category toEntity() {
         Category category = new Category();
-        category.setNombre(nombre);
+        category.setName(name);
         return category;
     }
 }
