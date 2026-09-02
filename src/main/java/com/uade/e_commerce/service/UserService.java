@@ -37,12 +37,12 @@ public class UserService {
             return null;
         }
 
-        existingUser.setNombre(user.getNombre());
-        existingUser.setApellido(user.getApellido());
+        existingUser.setName(user.getName());
+        existingUser.setLastName(user.getLastName());
         existingUser.setEmail(user.getEmail());
         existingUser.setPassword(user.getPassword());
-        existingUser.setLegajo(user.getLegajo());
-        existingUser.setHabilitado(user.isHabilitado());
+        existingUser.setRegNumber(user.getRegNumber());
+        existingUser.setEnabled(user.isEnabled());
 
         return userRepository.save(existingUser);
     }

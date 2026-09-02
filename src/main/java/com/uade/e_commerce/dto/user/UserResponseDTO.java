@@ -14,21 +14,21 @@ import lombok.NoArgsConstructor;
 public class UserResponseDTO {
 
     private Long id;
-    private String nombre;
-    private String apellido;
+    private String name;
+    private String lastName;
     private String email;
-    private String legajo;
-    private LocalDateTime fechaRegistro;
-    private boolean habilitado;
+    private String regNumber; //legajo
+    private LocalDateTime registrationDate;
+    private boolean IsEnabled;
 
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
                 user.getId(),
-                user.getNombre(),
-                user.getApellido(),
+                user.getName(),
+                user.getLastName(),
                 user.getEmail(),
-                user.getLegajo(),
-                user.getFechaRegistro(),
-                user.isHabilitado());
+                user.getRegNumber(),
+                user.getRegistrationDate(),
+                user.isEnabled());
     }
 }
