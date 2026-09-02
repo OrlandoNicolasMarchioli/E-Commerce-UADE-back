@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRequestDTO {
 
-    private String name;
+    private String firstName;
     private String lastName;
     private String email;
     private String password;
@@ -19,7 +19,7 @@ public class UserRequestDTO {
 
     public User toEntity() {
         User user = new User();
-        user.setName(name);
+        user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(password);

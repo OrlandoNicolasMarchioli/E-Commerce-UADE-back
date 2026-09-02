@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/products/{productId}/images")
+@RequestMapping("/api/products/{productId}/images")
 public class ProductImageController {
 
     @Autowired
