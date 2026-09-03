@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
+import com.uade.e_commerce.exception.InvalidCredentialsException;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.UserRepository;
 
@@ -79,6 +80,29 @@ public class UserService {
         }
         userRepository.deleteById(id);
         return true;
+    }
+
+    // Por ahora no genera ningún token: el login solo confirma la identidad.
+    public User login(String email, String rawPassword) {
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        // Los tres casos de error tiran la misma excepción a propósito (ver el
+        // comentario en InvalidCredentialsException).
+        if (user == null || !user.isEnabled()) {
+            throw new InvalidCredentialsException();
+        }
+
+        // Lo chequeamos nosotros para no depender de cómo trate los nulos la
+        // versión de turno del encoder.
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new InvalidCredentialsException();
+        }
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new InvalidCredentialsException();
+        }
+
+        return user;
     }
 
 }
