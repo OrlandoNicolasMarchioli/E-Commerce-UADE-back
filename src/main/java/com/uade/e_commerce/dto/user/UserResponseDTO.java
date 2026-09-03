@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class UserResponseDTO {
 
     private Long id;
-    private String name;
+    private String firstName;
     private String lastName;
     private String email;
     private String regNumber; //legajo
@@ -24,7 +24,7 @@ public class UserResponseDTO {
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
                 user.getId(),
-                user.getName(),
+                user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
                 user.getRegNumber(),
