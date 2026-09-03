@@ -43,6 +43,15 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
+		<!-- Solo el módulo de criptografía de Spring Security, no el starter completo.
+		     Nos da BCryptPasswordEncoder para hashear passwords sin activar la
+		     autoconfiguración de seguridad, que protegería todos los endpoints
+		     existentes y le rompería el flujo de Postman al resto del grupo. -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
