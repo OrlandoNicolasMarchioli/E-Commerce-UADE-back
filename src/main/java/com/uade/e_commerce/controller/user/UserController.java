@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uade.e_commerce.dto.user.LoginRequestDTO;
 import com.uade.e_commerce.dto.user.UserRequestDTO;
 import com.uade.e_commerce.dto.user.UserResponseDTO;
 import com.uade.e_commerce.model.User;
@@ -16,13 +15,14 @@ import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
 
 // http://localhost:8080/api/users
+// ABM administrativo de usuarios. El alta y el login están en
+// AuthenticationController, bajo /api/auth.
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -50,23 +50,6 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
-    }
-
-    // post http://localhost:8080/api/users
-    @PostMapping()
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO userRequestDTO) {
-        User createdUser = userService.createUser(userRequestDTO.toEntity());
-        return UserResponseDTO.fromEntity(createdUser);
-    }
-
-    // post http://localhost:8080/api/users/login
-    // Si las credenciales no sirven, el service tira InvalidCredentialsException
-    // y el GlobalExceptionHandler la convierte en un 401. Por eso acá no hay
-    // ningún if: si llegamos a la siguiente línea, el usuario es válido.
-    @PostMapping("/login")
-    public UserResponseDTO login(@RequestBody LoginRequestDTO loginRequestDTO) {
-        User user = userService.login(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
-        return UserResponseDTO.fromEntity(user);
     }
 
     // put http://localhost:8080/api/users/1
