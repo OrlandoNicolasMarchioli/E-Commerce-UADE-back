@@ -58,7 +58,7 @@ public class UserService {
             throw new EmailAlreadyExistsException(user.getEmail());
         }
 
-        existingUser.setName(user.getName());
+        existingUser.setFirstName(user.getFirstName());
         existingUser.setLastName(user.getLastName());
         existingUser.setEmail(user.getEmail());
 
