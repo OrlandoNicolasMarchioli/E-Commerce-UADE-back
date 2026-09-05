@@ -68,9 +68,6 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(ProductResponseDTO.fromEntity(product));
 
     }
@@ -94,9 +91,6 @@ public class ProductController {
 
         Category category = categoryService.getCategoryById(dto.getCategoryId());
         User publisher = userService.getUserById(publisherId);
-        if (category == null || publisher == null) {
-            return ResponseEntity.badRequest().build();
-        }
 
         Product product = dto.toEntity();
         product.setCategory(category);
@@ -110,27 +104,17 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO dto) {
         Category category = categoryService.getCategoryById(dto.getCategoryId());
-        if (category == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
         Product product = dto.toEntity();
         product.setCategory(category);
 
         Product updated = productService.updateProduct(id, product);
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(ProductResponseDTO.fromEntity(updated));
     }
 
     // delete http://localhost:8080/api/products/1
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        boolean deleted = productService.deleteProduct(id);
-        if (!deleted) {
-            return ResponseEntity.notFound().build();
-        }
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 }
