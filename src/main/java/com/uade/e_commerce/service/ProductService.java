@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.uade.e_commerce.exception.NegativePriceException;
+import com.uade.e_commerce.exception.ProductNotFoundException;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.repository.ProductRepository;
 
@@ -30,17 +32,34 @@ public class ProductService {
     }
 
     public Product getProductById(Long id) {
-        return productRepository.findById(id).orElse(null);
+        return productRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new ProductNotFoundException(
+                    "Producto no encontrado con id: " + id
+                )
+            );
     }
 
     public Product createProduct(Product product) {
+        if (product.getPrice() < 0) {
+            throw new NegativePriceException();
+        }
+
         return productRepository.save(product);
     }
 
     public Product updateProduct(Long id, Product product) {
-        Product existing = productRepository.findById(id).orElse(null);
-        if (existing == null) {
-            return null;
+        Product existing = productRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new ProductNotFoundException(
+                    "Producto no encontrado con id: " + id
+                )
+            );
+
+        if (product.getPrice() < 0) {
+            throw new NegativePriceException();
         }
 
         // Actualizamos campo por campo (en vez de reemplazar la entidad
@@ -62,7 +81,9 @@ public class ProductService {
 
     public boolean deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
-            return false;
+            throw new ProductNotFoundException(
+                "Producto no encontrado con id: " + id
+            );
         }
         productRepository.deleteById(id);
         return true;
