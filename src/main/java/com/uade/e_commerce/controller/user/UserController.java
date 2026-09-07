@@ -15,13 +15,14 @@ import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
 
 // http://localhost:8080/api/users
+// ABM administrativo de usuarios. El alta y el login están en
+// AuthenticationController, bajo /api/auth.
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -49,13 +50,6 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
-    }
-
-    // post http://localhost:8080/api/users
-    @PostMapping()
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO userRequestDTO) {
-        User createdUser = userService.createUser(userRequestDTO.toEntity());
-        return UserResponseDTO.fromEntity(createdUser);
     }
 
     // put http://localhost:8080/api/users/1
