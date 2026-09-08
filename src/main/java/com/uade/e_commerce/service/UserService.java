@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.UserRepository;
@@ -28,14 +29,19 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new UserNotFoundException("Usuario no encontrado con id: " + id)
+            );
     }
 
     public User updateUser(Long id, User user) {
-        User existingUser = userRepository.findById(id).orElse(null);
-        if (existingUser == null) {
-            return null;
-        }
+        User existingUser = userRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new UserNotFoundException("Usuario no encontrado con id: " + id)
+            );
 
         // Comparamos contra el email actual para no rechazar un update que manda el
         // mismo email de siempre, que es lo normal cuando solo se edita el nombre.
@@ -62,7 +68,9 @@ public class UserService {
 
     public boolean deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            return false;
+            throw new UserNotFoundException(
+                "Usuario no encontrado con id: " + id
+            );
         }
         userRepository.deleteById(id);
         return true;
