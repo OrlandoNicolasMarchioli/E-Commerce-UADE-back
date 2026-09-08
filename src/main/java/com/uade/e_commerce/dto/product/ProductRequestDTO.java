@@ -8,10 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-// Lo que llega en el body de un POST/PUT a /api/productos.
-// No tiene "category" (el objeto completo) sino "categoryId" (solo
-// el número). Es el controller el que busca la Category real en la base
-// a partir de ese id — el DTO no debería saber nada de JPA.
+// What comes in the body of a POST/PUT to /api/products.
+// It doesn't have "category" (the full object) but "categoryId" (just
+// the number). It's the controller that looks up the real Category in the
+// database from that id — the DTO shouldn't know anything about JPA.
 
 
 @Data
@@ -38,8 +38,8 @@ public class ProductRequestDTO {
         product.setMinutesDuration(minutesDuration);
         product.setAttendanceType(attendanceType);
 
-        // category y publisher quedan sin setear a propósito: el
-        // controller los completa después de buscarlos en la base.
+        // category and publisher are left unset on purpose: the
+        // controller fills them in after looking them up in the database.
         
         return product;
     }

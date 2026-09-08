@@ -43,8 +43,9 @@ public class UserService {
                 new UserNotFoundException("Usuario no encontrado con id: " + id)
             );
 
-        // Comparamos contra el email actual para no rechazar un update que manda el
-        // mismo email de siempre, que es lo normal cuando solo se edita el nombre.
+        // We compare against the current email so we don't reject an update
+        // that sends the same email as always, which is normal when only
+        // the name is being edited.
         if (!existingUser.getEmail().equals(user.getEmail())
                 && userRepository.existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException(user.getEmail());
@@ -54,8 +55,9 @@ public class UserService {
         existingUser.setLastName(user.getLastName());
         existingUser.setEmail(user.getEmail());
 
-        // Antes se pisaba siempre, así que un update sin password dejaba al usuario
-        // con la password en null y sin poder loguearse nunca más.
+        // Before, it was always overwritten, so an update without a
+        // password left the user with a null password and unable to ever
+        // log in again.
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }

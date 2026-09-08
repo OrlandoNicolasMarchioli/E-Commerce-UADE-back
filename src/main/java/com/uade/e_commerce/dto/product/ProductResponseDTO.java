@@ -37,9 +37,9 @@ public class ProductResponseDTO {
                 CategoryResponseDTO.fromEntity(product.getCategory()),
                 product.getPublisher().getId()
 
-                    // Devolvemos la categoría completa (anidada), no solo el id, para
-                    // que el frontend no tenga que hacer un segundo pedido para
-                    // mostrar el nombre de la categoría.
+                    // We return the full (nested) category, not just the id, so
+                    // the frontend doesn't have to make a second request to show
+                    // the category name.
         );
     }
 }

@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// A diferencia del resto de los Request DTO, este no tiene toEntity(): no crea
-// ni modifica un User, solo transporta las credenciales que se validan contra
-// el usuario que ya está guardado en la base.
+// Unlike the rest of the Request DTOs, this one has no toEntity(): it
+// doesn't create or modify a User, it just carries the credentials that get
+// validated against the user already stored in the database.
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

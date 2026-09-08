@@ -14,8 +14,9 @@ import com.uade.e_commerce.service.AuthenticationService;
 
 // http://localhost:8080/api/auth
 //
-// El alta de usuario vive acá y no en /api/users porque registrarse es parte de
-// la autenticación. Lo que queda en /api/users es el ABM administrativo.
+// User sign-up lives here and not in /api/users because registering is
+// part of authentication. What's left in /api/users is the administrative
+// CRUD.
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
@@ -34,9 +35,10 @@ public class AuthenticationController {
     }
 
     // post http://localhost:8080/api/auth/login
-    // Si las credenciales no sirven, el service tira InvalidCredentialsException
-    // y el GlobalExceptionHandler la convierte en un 401. Por eso acá no hay
-    // ningún if: si llegamos a la siguiente línea, el usuario es válido.
+    // If the credentials aren't valid, the service throws
+    // InvalidCredentialsException and the GlobalExceptionHandler turns it
+    // into a 401. That's why there's no if here: if we reach the next
+    // line, the user is valid.
     @PostMapping("/login")
     public ResponseEntity<UserResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
         User user = authenticationService.authenticate(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());

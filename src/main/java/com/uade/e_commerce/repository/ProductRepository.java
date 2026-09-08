@@ -9,7 +9,7 @@ import com.uade.e_commerce.model.Product;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
-    // La usamos para la home, que pide el listado alfabético.
+    // Used for the home page, which asks for the alphabetical listing.
     List<Product> findAllByOrderByNameAsc();
 
     List<Product> findByCategoryId(Long categoryId);

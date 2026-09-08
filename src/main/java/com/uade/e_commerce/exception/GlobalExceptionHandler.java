@@ -8,13 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-// Centraliza la traducción de excepciones a respuestas HTTP, así los controllers
-// no se llenan de try/catch y todos los errores salen con el mismo formato.
-//
-// NOTA PARA LA PARTE 7 (manejo global de errores):
-// acá solo se manejan a propósito las dos excepciones de esta entrega, para no
-// pisar ese trabajo. Para sumar una nueva alcanza con agregar otro método
-// @ExceptionHandler y reutilizar buildResponse(), que ya deja el JSON armado.
+// Centralizes translating exceptions into HTTP responses, so controllers
+// don't get cluttered with try/catch and every error comes out in the same
+// format. To add a new exception it's enough to add another
+// @ExceptionHandler method and reuse buildResponse(), which already builds
+// the JSON.
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -121,6 +119,13 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(DuplicateReviewException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateReview(
+        DuplicateReviewException ex
+    ) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     // =========================
     // 500 - INTERNAL SERVER ERROR
     // =========================
@@ -133,10 +138,10 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Se usa un Map y no un DTO para que la Parte 7 pueda definir el formato
-    // definitivo del error sin tener que deshacer una clase nuestra. Es
-    // LinkedHashMap y no HashMap para que las claves salgan siempre en el mismo
-    // orden en el JSON.
+    // A Map is used instead of a DTO so Part 7 can define the final error
+    // format without having to undo one of our classes. It's a LinkedHashMap
+    // and not a HashMap so the keys always come out in the same order in the
+    // JSON.
     private ResponseEntity<Map<String, Object>> buildResponse(
         HttpStatus status,
         String message

@@ -34,9 +34,9 @@ public class Product {
     @Column(nullable = false)
     private Double price;
 
-    // EnumType.STRING guarda "PHYSICAL"/"SERVICE" como texto en la base,
-    // en vez de 0/1. Así si el día de mañana agregamos un tercer tipo,
-    // no se rompen los datos ya guardados (con ORDINAL sí pasaría).
+    // EnumType.STRING stores "PHYSICAL"/"SERVICE" as text in the database,
+    // instead of 0/1. That way, if we add a third type down the line, the
+    // already-saved data doesn't break (it would with ORDINAL).
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,13 +48,13 @@ public class Product {
 
     private String attendanceType;
 
-    // Cada producto pertenece a una sola categoría (obligatorio).    
+    // Each product belongs to a single category (required).
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    // El usuario que publicó el producto (el "vendedor"). Obligatorio:
-    // todo producto tiene que tener un dueño.    
+    // The user who posted the product (the "seller"). Required: every
+    // product has to have an owner.
     @ManyToOne
     @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;

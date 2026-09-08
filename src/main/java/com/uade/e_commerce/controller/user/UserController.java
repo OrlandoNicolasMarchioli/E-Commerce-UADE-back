@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 // http://localhost:8080/api/users
-// ABM administrativo de usuarios. El alta y el login están en
-// AuthenticationController, bajo /api/auth.
+// Administrative CRUD for users. Sign-up and login live in
+// AuthenticationController, under /api/auth.
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
