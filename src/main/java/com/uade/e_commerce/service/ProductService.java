@@ -20,7 +20,7 @@ public class ProductService {
     }
 
     public List<Product> getAllProducts() {
-        // select * from productos
+        // select * from products
         return productRepository.findAllByOrderByNameAsc();
     }
 
@@ -43,8 +43,8 @@ public class ProductService {
             return null;
         }
 
-        // Actualizamos campo por campo (en vez de reemplazar la entidad
-        // entera) para no perder el id ni el publicador original.
+        // We update field by field (instead of replacing the whole entity)
+        // so we don't lose the id or the original publisher.
         existing.setName(product.getName());
         existing.setDescription(product.getDescription());
         existing.setPrice(product.getPrice());
@@ -54,8 +54,8 @@ public class ProductService {
         existing.setAttendanceType(product.getAttendanceType());
         existing.setCategory(product.getCategory());
 
-        // a propósito NO tocamos "publicador" acá. El dueño de un
-        // producto no debería poder cambiar con un simple update.
+        // on purpose we do NOT touch "publisher" here. A product's owner
+        // shouldn't be able to change with a simple update.
         return productRepository.save(existing);
     
     }

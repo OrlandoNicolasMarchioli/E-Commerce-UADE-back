@@ -17,7 +17,7 @@ public class UserResponseDTO {
     private String firstName;
     private String lastName;
     private String email;
-    private String regNumber; //legajo
+    private String regNumber; // student id number
     private LocalDateTime registrationDate;
     private boolean IsEnabled;
 

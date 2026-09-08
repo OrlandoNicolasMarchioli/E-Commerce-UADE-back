@@ -10,9 +10,9 @@ import com.uade.e_commerce.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
-// El registro y el login viven acá y no en UserService siguiendo la estructura
-// de la Clase 05: UserService queda con el ABM administrativo de usuarios y la
-// autenticación es su propio servicio.
+// Registration and login live here instead of in UserService, following the
+// structure from Class 05: UserService is left with the administrative
+// CRUD of users, and authentication is its own service.
 @Service
 @Transactional
 public class AuthenticationService {
@@ -26,30 +26,31 @@ public class AuthenticationService {
     }
 
     public User register(User user) {
-        // Lo chequeamos a mano para devolver un 409 claro: si dejamos que salte la
-        // constraint unique de la base, termina en un 500 poco útil.
+        // We check it manually to return a clear 409: if we let the
+        // database's unique constraint fire instead, it ends up as a
+        // not-very-useful 500.
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException(user.getEmail());
         }
 
-        // Solo se persiste el hash, nunca lo que mandó el cliente.
+        // Only the hash gets persisted, never what the client sent.
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
 
-    // Por ahora no genera ningún token: solo confirma la identidad.
+    // For now it doesn't generate any token: it just confirms identity.
     public User authenticate(String email, String rawPassword) {
         User user = userRepository.findByEmail(email).orElse(null);
 
-        // Los tres casos de error tiran la misma excepción a propósito (ver el
-        // comentario en InvalidCredentialsException).
+        // All three error cases throw the same exception on purpose (see
+        // the comment in InvalidCredentialsException).
         if (user == null || !user.isEnabled()) {
             throw new InvalidCredentialsException();
         }
 
-        // Lo chequeamos nosotros para no depender de cómo trate los nulos la
-        // versión de turno del encoder.
+        // We check it ourselves so we don't depend on however the current
+        // encoder version happens to handle nulls.
         if (rawPassword == null || rawPassword.isBlank()) {
             throw new InvalidCredentialsException();
         }

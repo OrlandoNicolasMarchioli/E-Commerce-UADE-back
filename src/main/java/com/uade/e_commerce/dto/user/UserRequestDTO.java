@@ -15,7 +15,7 @@ public class UserRequestDTO {
     private String lastName;
     private String email;
     private String password;
-    private String regNumber; //legajo
+    private String regNumber; // student id number
 
     public User toEntity() {
         User user = new User();

@@ -35,7 +35,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String regNumber; //legajo
+    private String regNumber; // student id number
 
     @Column(nullable = false)
     private LocalDateTime registrationDate = LocalDateTime.now();

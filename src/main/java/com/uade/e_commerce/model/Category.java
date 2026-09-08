@@ -11,8 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Categoría de un producto (ej: "Útiles", "Cursos", "Clases particulares").
- * Un producto pertenece a una única categoría (relación 1 a muchos).
+ * A product's category (e.g. "Supplies", "Courses", "Private lessons").
+ * A product belongs to a single category (1-to-many relationship).
  */
 
 @Data
@@ -27,7 +27,8 @@ public class Category {
     @Column(name = "category_id")
     private Long id;
 
-    // unique=true porque no tiene sentido tener dos categorías con el mismo nombre
+    // unique=true because it doesn't make sense to have two categories with
+    // the same name
     @Column(name = "category_name", nullable = false, unique = true)
     private String name;
 

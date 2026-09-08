@@ -1,8 +1,9 @@
 package com.uade.e_commerce.exception;
 
-// Es RuntimeException (unchecked) para no obligar al controller ni a las capas
-// intermedias a declarar throws: el service la lanza y el GlobalExceptionHandler
-// se encarga de traducirla a un 409.
+// It's a RuntimeException (unchecked) so we don't have to force the
+// controller or the intermediate layers to declare throws: the service
+// throws it and the GlobalExceptionHandler takes care of translating it
+// into a 409.
 public class EmailAlreadyExistsException extends RuntimeException {
 
     public EmailAlreadyExistsException(String email) {

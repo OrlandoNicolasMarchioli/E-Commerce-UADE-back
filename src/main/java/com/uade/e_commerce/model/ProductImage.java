@@ -29,7 +29,7 @@ public class ProductImage {
     @Column(name = "image_order", nullable = false)
     private Integer imageOrder;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Lazy loading para no cargar la imagen hasta que se necesite
+    @ManyToOne(fetch = FetchType.LAZY) // Lazy loading so the image isn't loaded until it's needed
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 

@@ -1,12 +1,12 @@
 package com.uade.e_commerce.model;
 
 /**
- * Tipo de producto: define si es algo físico que se envía (con stock)
- * o un servicio (clases particulares, cursos) que no maneja stock.
+ * Product type: defines whether it's a physical item that gets shipped
+ * (with stock) or a service (private lessons, courses) that doesn't
+ * manage stock.
  */
 
 public enum ProductType {
     PHYSICAL,
     SERVICE
-    
 }

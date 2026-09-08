@@ -8,14 +8,14 @@ import com.uade.e_commerce.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Spring Data arma la query sola a partir del nombre del método, no hace
-    // falta escribir el SQL ni anotar con @Query.
+    // Spring Data builds the query on its own from the method name, no need
+    // to write the SQL or annotate with @Query.
 
-    // Devuelve Optional en vez de User para que quede explícito que el email
-    // puede no existir y no haya que andar chequeando null.
+    // Returns Optional instead of User to make it explicit that the email
+    // might not exist, so there's no need to go around checking for null.
     Optional<User> findByEmail(String email);
 
-    // Más barato que traer el usuario entero cuando solo queremos saber si el
-    // email ya está tomado.
+    // Cheaper than fetching the whole user when we only want to know
+    // whether the email is already taken.
     boolean existsByEmail(String email);
 }

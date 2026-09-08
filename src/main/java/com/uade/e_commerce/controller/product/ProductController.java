@@ -34,10 +34,10 @@ public class ProductController {
     private final CategoryService categoryService;
     private final UserService userService;
 
-    // Necesitamos CategoryService y UserService acá (y no solo
-    // ProductService) porque al crear/editar un producto hay que
-    // validar que la categoría y el publicador realmente existan
-    // en la base antes de guardarlo.
+    // We need CategoryService and UserService here (and not just
+    // ProductService) because when creating/editing a product we have to
+    // validate that the category and the publisher actually exist in the
+    // database before saving it.
 
     ProductController(ProductService productService, CategoryService categoryService, UserService userService) {
         this.productService = productService;
@@ -46,7 +46,7 @@ public class ProductController {
     }
 
 
-    // get http://localhost:8080/api/products (orden alfabetico para la home)
+    // get http://localhost:8080/api/products (alphabetical order for the home page)
     @GetMapping()
     public List<ProductResponseDTO> getAllProducts() {
         return productService.getAllProducts().stream()
@@ -55,7 +55,7 @@ public class ProductController {
     }
 
     // get http://localhost:8080/api/products/category/1
-    // Filtro por categoría, para la sección de "tipos de producto" de la home.
+    // Filter by category, for the home page's "product types" section.
     @GetMapping("/category/{categoryId}")
     public List<ProductResponseDTO> getProductsByCategory(@PathVariable Long categoryId) {
         return productService.getProductsByCategory(categoryId).stream()
@@ -64,7 +64,7 @@ public class ProductController {
     }
 
     // get http://localhost:8080/api/products/1
-    // Detalle de un producto puntual.
+    // Detail of a specific product.
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
@@ -77,10 +77,10 @@ public class ProductController {
 
     // post http://localhost:8080/api/products?publisherId=1
 
-    // publisherId va como query param (en vez de sacarlo de una sesión
-    // logueada) porque todavía no existe el login en el proyecto.
-    // Cuando la parte del login esté lista, esto debería reemplazarse
-    // por el id del usuario autenticado.
+    // publisherId goes as a query param (instead of being pulled from a
+    // logged-in session) because there's still no login in the project.
+    // Once the login part is ready, this should be replaced with the
+    // authenticated user's id.
 
 
     @PostMapping()
@@ -88,9 +88,9 @@ public class ProductController {
             @RequestBody ProductRequestDTO dto,
             @RequestParam Long publisherId) {
 
-        // Validamos que la categoría y el usuario existan ANTES de crear
-        // el producto, para no terminar con un producto "huérfano" o
-        // con un error feo de integridad referencial en la base.
+        // We validate that the category and the user exist BEFORE creating
+        // the product, so we don't end up with an "orphan" product or an
+        // ugly referential-integrity error in the database.
 
         Category category = categoryService.getCategoryById(dto.getCategoryId());
         User publisher = userService.getUserById(publisherId);
