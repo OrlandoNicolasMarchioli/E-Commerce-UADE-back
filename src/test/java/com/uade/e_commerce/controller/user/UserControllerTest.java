@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.service.UserService;
 
@@ -57,7 +58,7 @@ class UserControllerTest {
 
     @Test
     void getUserById_notFound_returns404() throws Exception {
-        when(userService.getUserById(99L)).thenReturn(null);
+        when(userService.getUserById(99L)).thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(get("/api/users/99"))
                 .andExpect(status().isNotFound());
@@ -76,7 +77,7 @@ class UserControllerTest {
 
     @Test
     void updateUser_notFound_returns404() throws Exception {
-        when(userService.updateUser(eq(99L), any(User.class))).thenReturn(null);
+        when(userService.updateUser(eq(99L), any(User.class))).thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(put("/api/users/99")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +95,7 @@ class UserControllerTest {
 
     @Test
     void deleteUser_notFound_returns404() throws Exception {
-        when(userService.deleteUser(99L)).thenReturn(false);
+        when(userService.deleteUser(99L)).thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(delete("/api/users/99"))
                 .andExpect(status().isNotFound());

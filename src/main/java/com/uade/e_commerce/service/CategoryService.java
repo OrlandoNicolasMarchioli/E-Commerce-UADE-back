@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.uade.e_commerce.exception.CategoryNotFoundException;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.repository.CategoryRepository;
 
@@ -24,7 +25,13 @@ public class CategoryService {
     }
 
     public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id).orElse(null);
+        return categoryRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new CategoryNotFoundException(
+                    "Categoría no encontrada con id: " + id
+                )
+            );
     }
 
     public Category createCategory(Category category) {
@@ -32,17 +39,23 @@ public class CategoryService {
     }
 
     public Category updateCategory(Long id, Category category) {
-        Category existing = categoryRepository.findById(id).orElse(null);
-        if (existing == null) {
-            return null;
-        }
+        Category existing = categoryRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new CategoryNotFoundException(
+                    "Categoría no encontrada con id: " + id
+                )
+            );
+
         existing.setName(category.getName());
         return categoryRepository.save(existing);
     }
 
     public boolean deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
-            return false;
+            throw new CategoryNotFoundException(
+                "Categoría no encontrada con id: " + id
+            );
         }
         categoryRepository.deleteById(id);
         return true;

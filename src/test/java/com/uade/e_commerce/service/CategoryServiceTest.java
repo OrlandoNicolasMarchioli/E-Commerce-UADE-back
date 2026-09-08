@@ -1,6 +1,7 @@
 package com.uade.e_commerce.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.uade.e_commerce.exception.CategoryNotFoundException;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.repository.CategoryRepository;
 
@@ -50,12 +52,11 @@ class CategoryServiceTest {
     }
 
     @Test
-    void getCategoryById_notFound_returnsNull() {
+    void getCategoryById_notFound_throwsCategoryNotFoundException() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Category result = categoryService.getCategoryById(99L);
-
-        assertThat(result).isNull();
+        assertThatThrownBy(() -> categoryService.getCategoryById(99L))
+                .isInstanceOf(CategoryNotFoundException.class);
     }
 
     @Test
@@ -83,12 +84,12 @@ class CategoryServiceTest {
     }
 
     @Test
-    void updateCategory_notFound_returnsNull() {
+    void updateCategory_notFound_throwsAndDoesNotSave() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Category result = categoryService.updateCategory(99L, new Category(null, "x", null));
+        assertThatThrownBy(() -> categoryService.updateCategory(99L, new Category(null, "x", null)))
+                .isInstanceOf(CategoryNotFoundException.class);
 
-        assertThat(result).isNull();
         verify(categoryRepository, never()).save(any());
     }
 
@@ -103,12 +104,12 @@ class CategoryServiceTest {
     }
 
     @Test
-    void deleteCategory_notFound_returnsFalseWithoutDeleting() {
+    void deleteCategory_notFound_throwsAndDoesNotDelete() {
         when(categoryRepository.existsById(anyLong())).thenReturn(false);
 
-        boolean result = categoryService.deleteCategory(99L);
+        assertThatThrownBy(() -> categoryService.deleteCategory(99L))
+                .isInstanceOf(CategoryNotFoundException.class);
 
-        assertThat(result).isFalse();
         verify(categoryRepository, never()).deleteById(any());
     }
 }

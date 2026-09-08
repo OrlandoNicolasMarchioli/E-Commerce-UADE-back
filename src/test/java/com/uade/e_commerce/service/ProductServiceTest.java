@@ -1,6 +1,7 @@
 package com.uade.e_commerce.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.uade.e_commerce.exception.ProductNotFoundException;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
@@ -76,10 +78,11 @@ class ProductServiceTest {
     }
 
     @Test
-    void getProductById_notFound_returnsNull() {
+    void getProductById_notFound_throwsProductNotFoundException() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThat(productService.getProductById(99L)).isNull();
+        assertThatThrownBy(() -> productService.getProductById(99L))
+                .isInstanceOf(ProductNotFoundException.class);
     }
 
     @Test
@@ -123,12 +126,12 @@ class ProductServiceTest {
     }
 
     @Test
-    void updateProduct_notFound_returnsNull() {
+    void updateProduct_notFound_throwsAndDoesNotSave() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Product result = productService.updateProduct(99L, buildProduct(null, "x"));
+        assertThatThrownBy(() -> productService.updateProduct(99L, buildProduct(null, "x")))
+                .isInstanceOf(ProductNotFoundException.class);
 
-        assertThat(result).isNull();
         verify(productRepository, never()).save(any());
     }
 
@@ -141,10 +144,12 @@ class ProductServiceTest {
     }
 
     @Test
-    void deleteProduct_notFound_returnsFalseWithoutDeleting() {
+    void deleteProduct_notFound_throwsAndDoesNotDelete() {
         when(productRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThat(productService.deleteProduct(99L)).isFalse();
+        assertThatThrownBy(() -> productService.deleteProduct(99L))
+                .isInstanceOf(ProductNotFoundException.class);
+
         verify(productRepository, never()).deleteById(any());
     }
 }

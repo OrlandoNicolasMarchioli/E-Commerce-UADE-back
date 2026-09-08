@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
+import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.UserRepository;
 
@@ -57,10 +58,11 @@ class UserServiceTest {
     }
 
     @Test
-    void getUserById_notFound_returnsNull() {
+    void getUserById_notFound_throwsUserNotFoundException() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThat(userService.getUserById(99L)).isNull();
+        assertThatThrownBy(() -> userService.getUserById(99L))
+                .isInstanceOf(UserNotFoundException.class);
     }
 
     @Test
@@ -108,10 +110,11 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUser_notFound_returnsNull() {
+    void updateUser_notFound_throwsUserNotFoundException() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThat(userService.updateUser(99L, buildUser(null, "x@test.com", null))).isNull();
+        assertThatThrownBy(() -> userService.updateUser(99L, buildUser(null, "x@test.com", null)))
+                .isInstanceOf(UserNotFoundException.class);
     }
 
     @Test
@@ -151,10 +154,12 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteUser_notFound_returnsFalse() {
+    void deleteUser_notFound_throwsAndDoesNotDelete() {
         when(userRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThat(userService.deleteUser(99L)).isFalse();
+        assertThatThrownBy(() -> userService.deleteUser(99L))
+                .isInstanceOf(UserNotFoundException.class);
+
         verify(userRepository, never()).deleteById(any());
     }
 }

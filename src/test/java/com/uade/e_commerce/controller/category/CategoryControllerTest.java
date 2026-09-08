@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.uade.e_commerce.exception.CategoryNotFoundException;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.service.CategoryService;
 
@@ -54,7 +55,7 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById_notFound_returns404() throws Exception {
-        when(categoryService.getCategoryById(99L)).thenReturn(null);
+        when(categoryService.getCategoryById(99L)).thenThrow(new CategoryNotFoundException(99L));
 
         mockMvc.perform(get("/api/category/99"))
                 .andExpect(status().isNotFound());
@@ -85,7 +86,8 @@ class CategoryControllerTest {
 
     @Test
     void updateCategory_notFound_returns404() throws Exception {
-        when(categoryService.updateCategory(eq(99L), any(Category.class))).thenReturn(null);
+        when(categoryService.updateCategory(eq(99L), any(Category.class)))
+                .thenThrow(new CategoryNotFoundException(99L));
 
         mockMvc.perform(put("/api/category/99")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +105,7 @@ class CategoryControllerTest {
 
     @Test
     void deleteCategory_notFound_returns404() throws Exception {
-        when(categoryService.deleteCategory(99L)).thenReturn(false);
+        when(categoryService.deleteCategory(99L)).thenThrow(new CategoryNotFoundException(99L));
 
         mockMvc.perform(delete("/api/category/99"))
                 .andExpect(status().isNotFound());
