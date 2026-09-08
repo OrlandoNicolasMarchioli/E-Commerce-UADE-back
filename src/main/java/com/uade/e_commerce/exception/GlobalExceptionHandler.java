@@ -121,13 +121,6 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    //@ExceptionHandler(DuplicateReviewException.class)
-    //public ResponseEntity<Map<String, Object>> handleDuplicateReview(
-    //    DuplicateReviewException ex
-    //) {
-    //    return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
-    //}
-
     // =========================
     // 500 - INTERNAL SERVER ERROR
     // =========================
