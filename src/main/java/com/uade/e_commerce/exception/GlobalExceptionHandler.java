@@ -1,69 +1,81 @@
 package com.uade.e_commerce.exception;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+// Centraliza la traducción de excepciones a respuestas HTTP, así los controllers
+// no se llenan de try/catch y todos los errores salen con el mismo formato.
+//
+// NOTA PARA LA PARTE 7 (manejo global de errores):
+// acá solo se manejan a propósito las dos excepciones de esta entrega, para no
+// pisar ese trabajo. Para sumar una nueva alcanza con agregar otro método
+// @ExceptionHandler y reutilizar buildResponse(), que ya deja el JSON armado.
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(
+        EmailAlreadyExistsException ex
+    ) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(
+        InvalidCredentialsException ex
+    ) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
 
     // =========================
     // 404 - NOT FOUND
     // =========================
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<String> manejarProductoNoEncontrado(
+    public ResponseEntity<Map<String, Object>> handleProductNotFound(
         ProductNotFoundException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<String> manejarCategoriaNoEncontrada(
+    public ResponseEntity<Map<String, Object>> handleCategoryNotFound(
         CategoryNotFoundException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> manejarUsuarioNoEncontrado(
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(
         UserNotFoundException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
-    public ResponseEntity<String> manejarOrdenNoEncontrada(
+    public ResponseEntity<Map<String, Object>> handleOrderNotFound(
         OrderNotFoundException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(ReviewNotFoundException.class)
-    public ResponseEntity<String> manejarReviewNoEncontrada(
+    public ResponseEntity<Map<String, Object>> handleReviewNotFound(
         ReviewNotFoundException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(ProductImageNotFoundException.class)
-    public ResponseEntity<String> manejarImagenNoEncontrada(
+    public ResponseEntity<Map<String, Object>> handleProductImageNotFound(
         ProductImageNotFoundException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     // =========================
@@ -71,39 +83,31 @@ public class GlobalExceptionHandler {
     // =========================
 
     @ExceptionHandler(NegativePriceException.class)
-    public ResponseEntity<String> manejarPrecioNegativo(
+    public ResponseEntity<Map<String, Object>> handleNegativePrice(
         NegativePriceException ex
     ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(InvalidQuantityException.class)
-    public ResponseEntity<String> manejarCantidadInvalida(
+    public ResponseEntity<Map<String, Object>> handleInvalidQuantity(
         InvalidQuantityException ex
     ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(InvalidOrderStateException.class)
-    public ResponseEntity<String> manejarEstadoOrdenInvalido(
+    public ResponseEntity<Map<String, Object>> handleInvalidOrderState(
         InvalidOrderStateException ex
     ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> manejarArgumentoInvalido(
+    public ResponseEntity<Map<String, Object>> handleInvalidArgument(
         IllegalArgumentException ex
     ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            ex.getMessage()
-        );
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     // =========================
@@ -111,17 +115,17 @@ public class GlobalExceptionHandler {
     // =========================
 
     @ExceptionHandler(InsufficientStockException.class)
-    public ResponseEntity<String> manejarStockInsuficiente(
+    public ResponseEntity<Map<String, Object>> handleInsufficientStock(
         InsufficientStockException ex
     ) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     //@ExceptionHandler(DuplicateReviewException.class)
-    //public ResponseEntity<String> manejarReviewDuplicada(
+    //public ResponseEntity<Map<String, Object>> handleDuplicateReview(
     //    DuplicateReviewException ex
     //) {
-    //    return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    //    return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     //}
 
     // =========================
@@ -129,9 +133,25 @@ public class GlobalExceptionHandler {
     // =========================
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> manejarErroresGenerales(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+    public ResponseEntity<Map<String, Object>> handleGeneralErrors(Exception ex) {
+        return buildResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR,
             "Error interno del servidor"
         );
+    }
+
+    // Se usa un Map y no un DTO para que la Parte 7 pueda definir el formato
+    // definitivo del error sin tener que deshacer una clase nuestra. Es
+    // LinkedHashMap y no HashMap para que las claves salgan siempre en el mismo
+    // orden en el JSON.
+    private ResponseEntity<Map<String, Object>> buildResponse(
+        HttpStatus status,
+        String message
+    ) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        return ResponseEntity.status(status).body(body);
     }
 }
