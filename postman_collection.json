@@ -64,6 +64,11 @@
       "key": "orderId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "orderOtherUserId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -1479,6 +1484,53 @@
           ]
         },
         {
+          "name": "Setup - Register Another User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Se usa para verificar que un usuario no pueda leer ni modificar pedidos de otro.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Pedro\",\n  \"lastName\": \"Stella\",\n  \"email\": \"otro-comprador@test.com\",\n  \"password\": \"secret123\",\n  \"regNumber\": \"1144815\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('orderOtherUserId', jsonData.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Setup - Create Category",
           "request": {
             "method": "POST",
@@ -1854,7 +1906,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1862,6 +1914,12 @@
                 "api",
                 "orders",
                 "{{orderId}}"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },
@@ -1881,12 +1939,101 @@
           ]
         },
         {
+          "name": "Get Order By Id - Other User (403)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Conocer el id no alcanza: el pedido tiene que pertenecer al usuario que lo pide.",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}?userId={{orderOtherUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderOtherUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Status - Other User (403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Un usuario no puede cambiar el estado de un pedido ajeno.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status?userId={{orderOtherUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderOtherUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Get Order By Id - Not Found (404)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/999999",
+              "raw": "{{baseUrl}}/api/orders/999999?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1894,6 +2041,12 @@
                 "api",
                 "orders",
                 "999999"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },
@@ -1931,7 +2084,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1940,6 +2093,12 @@
                 "orders",
                 "{{orderId}}",
                 "status"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },
@@ -1977,7 +2136,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1986,6 +2145,12 @@
                 "orders",
                 "{{orderId}}",
                 "status"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },
@@ -2022,7 +2187,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2031,6 +2196,12 @@
                 "orders",
                 "{{orderId}}",
                 "status"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },
@@ -2070,7 +2241,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2079,6 +2250,12 @@
                 "orders",
                 "{{orderId}}",
                 "status"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },
@@ -2150,7 +2327,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status?userId={{orderUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2159,6 +2336,12 @@
                 "orders",
                 "{{orderId}}",
                 "status"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
               ]
             }
           },

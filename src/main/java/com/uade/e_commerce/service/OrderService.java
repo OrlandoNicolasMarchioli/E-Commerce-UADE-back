@@ -1,6 +1,8 @@
 package com.uade.e_commerce.service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +12,9 @@ import com.uade.e_commerce.dto.order.OrderResponseDTO;
 import com.uade.e_commerce.exception.EmptyCartException;
 import com.uade.e_commerce.exception.InsufficientStockException;
 import com.uade.e_commerce.exception.InvalidOrderStateException;
+import com.uade.e_commerce.exception.OrderAccessDeniedException;
 import com.uade.e_commerce.exception.OrderNotFoundException;
+import com.uade.e_commerce.exception.ProductNotFoundException;
 import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.model.Cart;
 import com.uade.e_commerce.model.CartItem;
@@ -22,7 +26,6 @@ import com.uade.e_commerce.model.ProductType;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.CartItemRepository;
 import com.uade.e_commerce.repository.CartRepository;
-import com.uade.e_commerce.repository.OrderItemRepository;
 import com.uade.e_commerce.repository.OrderRepository;
 import com.uade.e_commerce.repository.ProductRepository;
 import com.uade.e_commerce.repository.UserRepository;
@@ -38,7 +41,6 @@ import jakarta.transaction.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
@@ -46,14 +48,12 @@ public class OrderService {
 
     public OrderService(
         OrderRepository orderRepository,
-        OrderItemRepository orderItemRepository,
         CartRepository cartRepository,
         CartItemRepository cartItemRepository,
         ProductRepository productRepository,
         UserRepository userRepository
     ) {
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
@@ -81,11 +81,24 @@ public class OrderService {
             throw new EmptyCartException(userId);
         }
 
+        // The products are re-read with a lock before being looked at. From
+        // here until the transaction ends, no other checkout can read or
+        // modify their stock, so the value validated below is the same one
+        // that gets discounted afterwards.
+        Map<Long, Product> lockedProducts =
+            lockProducts(cartItems);
+
         // First pass: check that every line can be fulfilled. Stock is only
         // touched once the whole cart is known to be valid, so a failure on
         // the last item doesn't leave the first ones already discounted.
         for (CartItem cartItem : cartItems) {
-            validateStock(cartItem);
+
+            validateStock(
+                lockedProducts.get(
+                    cartItem.getProduct().getId()
+                ),
+                cartItem.getQuantity()
+            );
         }
 
         Order order = new Order();
@@ -98,7 +111,10 @@ public class OrderService {
         // Second pass: now the order is actually built and stock is applied.
         for (CartItem cartItem : cartItems) {
 
-            Product product = cartItem.getProduct();
+            Product product =
+                lockedProducts.get(
+                    cartItem.getProduct().getId()
+                );
 
             OrderItem orderItem = new OrderItem();
 
@@ -115,7 +131,10 @@ public class OrderService {
             total +=
                 product.getPrice() * cartItem.getQuantity();
 
-            discountStock(product, cartItem.getQuantity());
+            applyStock(
+                product,
+                -cartItem.getQuantity()
+            );
         }
 
         order.setTotal(total);
@@ -135,24 +154,32 @@ public class OrderService {
 
         getUser(userId);
 
+        // findByUserIdWithItems brings the items in the same query. Reading
+        // them order by order would run one extra query per order.
         return orderRepository
-            .findByUserIdOrderByOrderDateDesc(userId)
+            .findByUserIdWithItems(userId)
             .stream()
             .map(this::buildResponse)
             .collect(Collectors.toList());
     }
 
-    public OrderResponseDTO getOrderById(Long orderId) {
+    public OrderResponseDTO getOrderById(
+        Long orderId,
+        Long userId
+    ) {
 
-        return buildResponse(getOrder(orderId));
+        return buildResponse(
+            getOrderOwnedBy(orderId, userId)
+        );
     }
 
     public OrderResponseDTO updateStatus(
         Long orderId,
+        Long userId,
         String newStatus
     ) {
 
-        Order order = getOrder(orderId);
+        Order order = getOrderOwnedBy(orderId, userId);
 
         OrderStatus target = parseStatus(newStatus);
 
@@ -179,11 +206,71 @@ public class OrderService {
         );
     }
 
+    // An order can only be read or modified by the user who placed it.
+    //
+    // The id of the user travels as a parameter because the project has no
+    // authentication yet: when there is one, it will come from the session
+    // instead and this check stays the same.
+    private Order getOrderOwnedBy(
+        Long orderId,
+        Long userId
+    ) {
+
+        Order order = getOrder(orderId);
+
+        if (
+            !order.getUser().getId().equals(userId)
+        ) {
+            throw new OrderAccessDeniedException(
+                orderId,
+                userId
+            );
+        }
+
+        return order;
+    }
+
+    // The locks are taken ordered by product id so that two simultaneous
+    // checkouts request them in the same order. Taking them in different
+    // orders is what leaves two transactions waiting for each other forever
+    // (a deadlock).
+    private Map<Long, Product> lockProducts(
+        List<CartItem> cartItems
+    ) {
+
+        Map<Long, Product> lockedProducts =
+            new LinkedHashMap<>();
+
+        cartItems
+            .stream()
+            .map(cartItem ->
+                cartItem.getProduct().getId()
+            )
+            .distinct()
+            .sorted()
+            .forEach(productId ->
+                lockedProducts.put(
+                    productId,
+                    productRepository
+                        .findByIdForUpdate(productId)
+                        .orElseThrow(() ->
+                            new ProductNotFoundException(
+                                "Producto no encontrado con id: " +
+                                productId
+                            )
+                        )
+                )
+            );
+
+        return lockedProducts;
+    }
+
     // Services (lessons, courses) have no stock to control: they can be sold
     // as many times as needed. Same criteria already used by CartService.
-    private void validateStock(CartItem cartItem) {
-
-        Product product = cartItem.getProduct();
+    private void validateStock(
+        Product product,
+        Integer quantity
+    ) {
 
         if (product.getType() != ProductType.PHYSICAL) {
             return;
@@ -197,58 +284,61 @@ public class OrderService {
         // The cart already validated stock when the item was added, but time
         // may have passed and another user may have taken those units. The
         // check that counts is this one.
-        if (cartItem.getQuantity() > availableStock) {
+        if (quantity > availableStock) {
 
             throw new InsufficientStockException(
                 product.getId(),
-                cartItem.getQuantity(),
+                quantity,
                 availableStock
             );
         }
     }
 
-    private void discountStock(
+    // A negative amount discounts (a purchase) and a positive one gives back
+    // (a cancellation). Both cases are the same operation, so they share the
+    // check for products without stock.
+    private void applyStock(
         Product product,
-        Integer quantity
+        int amount
     ) {
 
         if (product.getType() != ProductType.PHYSICAL) {
             return;
         }
 
-        product.setStock(
-            product.getStock() - quantity
-        );
+        int currentStock =
+            product.getStock() == null
+                ? 0
+                : product.getStock();
+
+        product.setStock(currentStock + amount);
 
         productRepository.save(product);
     }
 
     private void restoreStock(Order order) {
 
-        List<OrderItem> orderItems =
-            orderItemRepository
-                .findByOrderIdOrderByIdAsc(
-                    order.getId()
-                );
+        // The items are already loaded with the order, so they aren't asked
+        // for again. The products, on the other hand, are re-read with a
+        // lock: giving stock back also reads and writes it.
+        for (OrderItem orderItem : order.getItems()) {
 
-        for (OrderItem orderItem : orderItems) {
+            Product product =
+                productRepository
+                    .findByIdForUpdate(
+                        orderItem.getProduct().getId()
+                    )
+                    .orElseThrow(() ->
+                        new ProductNotFoundException(
+                            "Producto no encontrado con id: " +
+                            orderItem.getProduct().getId()
+                        )
+                    );
 
-            Product product = orderItem.getProduct();
-
-            if (product.getType() != ProductType.PHYSICAL) {
-                continue;
-            }
-
-            int currentStock =
-                product.getStock() == null
-                    ? 0
-                    : product.getStock();
-
-            product.setStock(
-                currentStock + orderItem.getQuantity()
+            applyStock(
+                product,
+                orderItem.getQuantity()
             );
-
-            productRepository.save(product);
         }
     }
 
@@ -292,7 +382,7 @@ public class OrderService {
     private Order getOrder(Long orderId) {
 
         return orderRepository
-            .findById(orderId)
+            .findByIdWithItems(orderId)
             .orElseThrow(() ->
                 new OrderNotFoundException(orderId)
             );
@@ -300,11 +390,11 @@ public class OrderService {
 
     private OrderResponseDTO buildResponse(Order order) {
 
+        // The items come already loaded with the order, so building the
+        // response doesn't hit the database again.
         List<OrderItemResponseDTO> items =
-            orderItemRepository
-                .findByOrderIdOrderByIdAsc(
-                    order.getId()
-                )
+            order
+                .getItems()
                 .stream()
                 .map(OrderItemResponseDTO::fromEntity)
                 .collect(Collectors.toList());

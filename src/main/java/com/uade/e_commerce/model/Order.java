@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -67,12 +68,16 @@ public class Order {
     // the items go along with it. orphanRemoval means an item taken out of
     // the list is deleted from the database, since an item has no meaning
     // outside its order.
+    //
+    // @OrderBy keeps the lines always in the same order, so the response of
+    // an order doesn't change between calls.
     @OneToMany(
         mappedBy = "order",
         cascade = CascadeType.ALL,
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
+    @OrderBy("id ASC")
     @ToString.Exclude
     private List<OrderItem> items = new ArrayList<>();
 

@@ -206,6 +206,111 @@ class OrderRepositoryTest {
             .isEqualTo(1000.0);
     }
 
+    // The JOIN FETCH has to bring the order together with its items in a
+    // single query, and DISTINCT has to prevent the order from appearing
+    // repeated once per item.
+    @Test
+    void findByUserIdWithItems_doesNotRepeatTheOrder() {
+
+        Order order = buildOrder(
+            LocalDateTime.now(),
+            3000.0
+        );
+
+        order.addItem(buildOrderItem(2, 1000.0));
+        order.addItem(buildOrderItem(1, 1000.0));
+
+        orderRepository.save(order);
+
+        List<Order> result =
+            orderRepository.findByUserIdWithItems(
+                user.getId()
+            );
+
+        assertThat(result).hasSize(1);
+
+        assertThat(result.get(0).getItems())
+            .hasSize(2);
+    }
+
+    @Test
+    void findByUserIdWithItems_returnsNewestFirst() {
+
+        orderRepository.save(
+            buildOrder(
+                LocalDateTime.now().minusDays(2),
+                1000.0
+            )
+        );
+
+        orderRepository.save(
+            buildOrder(
+                LocalDateTime.now(),
+                2000.0
+            )
+        );
+
+        List<Order> result =
+            orderRepository.findByUserIdWithItems(
+                user.getId()
+            );
+
+        assertThat(result).hasSize(2);
+
+        assertThat(result.get(0).getTotal())
+            .isEqualTo(2000.0);
+    }
+
+    @Test
+    void findByIdWithItems_returnsOrderWithItems() {
+
+        Order order = buildOrder(
+            LocalDateTime.now(),
+            2000.0
+        );
+
+        order.addItem(buildOrderItem(2, 1000.0));
+
+        Order saved = orderRepository.save(order);
+
+        var result =
+            orderRepository.findByIdWithItems(
+                saved.getId()
+            );
+
+        assertThat(result).isPresent();
+
+        assertThat(result.get().getItems())
+            .hasSize(1);
+
+        assertThat(
+            result.get().getItems().get(0).getProductName()
+        ).isEqualTo("Cuaderno");
+    }
+
+    @Test
+    void findByIdWithItems_notFound_returnsEmpty() {
+
+        assertThat(
+            orderRepository.findByIdWithItems(999999L)
+        ).isEmpty();
+    }
+
+    // The lock used by the checkout has to be able to read the product.
+    @Test
+    void findByIdForUpdate_returnsProduct() {
+
+        var result =
+            productRepository.findByIdForUpdate(
+                product.getId()
+            );
+
+        assertThat(result).isPresent();
+
+        assertThat(result.get().getStock())
+            .isEqualTo(10);
+    }
+
     @Test
     void findByUserId_userWithoutOrders_returnsEmpty() {
 

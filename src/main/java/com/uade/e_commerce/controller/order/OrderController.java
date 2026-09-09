@@ -54,18 +54,22 @@ public class OrderController {
         return orderService.getOrdersByUser(userId);
     }
 
-    // GET http://localhost:8080/api/orders/5
+    // GET http://localhost:8080/api/orders/5?userId=1
+    //
+    // userId is required: without it, knowing the id would be enough to read
+    // somebody else's order.
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> getOrderById(
-        @PathVariable Long id
+        @PathVariable Long id,
+        @RequestParam Long userId
     ) {
 
         return ResponseEntity.ok(
-            orderService.getOrderById(id)
+            orderService.getOrderById(id, userId)
         );
     }
 
-    // PUT http://localhost:8080/api/orders/5/status
+    // PUT http://localhost:8080/api/orders/5/status?userId=1
     // Body: { "status": "PAID" }
     //
     // Cancelling doesn't get its own endpoint: it's one more state change,
@@ -74,12 +78,14 @@ public class OrderController {
     @PutMapping("/{id}/status")
     public ResponseEntity<OrderResponseDTO> updateStatus(
         @PathVariable Long id,
+        @RequestParam Long userId,
         @RequestBody OrderStatusRequestDTO dto
     ) {
 
         return ResponseEntity.ok(
             orderService.updateStatus(
                 id,
+                userId,
                 dto.getStatus()
             )
         );

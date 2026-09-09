@@ -118,6 +118,22 @@ public class GlobalExceptionHandler {
     }
 
     // =========================
+    // 403 - FORBIDDEN
+    // =========================
+
+    // 403 and not 404: the order exists, what's missing is permission over
+    // it. It's answered this way because the project has no authentication
+    // yet and the message is clearer while developing; with real users it
+    // would be worth evaluating a 404 so that ids of other people's orders
+    // can't be probed.
+    @ExceptionHandler(OrderAccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderAccessDenied(
+        OrderAccessDeniedException ex
+    ) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    // =========================
     // 409 - CONFLICT
     // =========================
 

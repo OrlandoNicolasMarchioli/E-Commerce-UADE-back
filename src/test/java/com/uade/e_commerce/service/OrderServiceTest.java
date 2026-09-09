@@ -21,6 +21,7 @@ import com.uade.e_commerce.dto.order.OrderResponseDTO;
 import com.uade.e_commerce.exception.EmptyCartException;
 import com.uade.e_commerce.exception.InsufficientStockException;
 import com.uade.e_commerce.exception.InvalidOrderStateException;
+import com.uade.e_commerce.exception.OrderAccessDeniedException;
 import com.uade.e_commerce.exception.OrderNotFoundException;
 import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.model.Cart;
@@ -33,7 +34,6 @@ import com.uade.e_commerce.model.ProductType;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.CartItemRepository;
 import com.uade.e_commerce.repository.CartRepository;
-import com.uade.e_commerce.repository.OrderItemRepository;
 import com.uade.e_commerce.repository.OrderRepository;
 import com.uade.e_commerce.repository.ProductRepository;
 import com.uade.e_commerce.repository.UserRepository;
@@ -43,9 +43,6 @@ class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private OrderItemRepository orderItemRepository;
 
     @Mock
     private CartRepository cartRepository;
@@ -147,6 +144,15 @@ class OrderServiceTest {
             });
     }
 
+    // The checkout re-reads each product with a lock before touching it.
+    private void stubProductLock(Product product) {
+        when(
+            productRepository.findByIdForUpdate(
+                product.getId()
+            )
+        ).thenReturn(Optional.of(product));
+    }
+
     // =========================
     // CHECKOUT
     // =========================
@@ -171,6 +177,7 @@ class OrderServiceTest {
             List.of(buildCartItem(cart, product, 2))
         );
 
+        stubProductLock(product);
         stubOrderSave();
 
         OrderResponseDTO result =
@@ -198,9 +205,44 @@ class OrderServiceTest {
         assertThat(result.getId()).isEqualTo(100L);
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getTotal()).isEqualTo(2000.0);
+        assertThat(result.getItems()).hasSize(1);
 
         assertThat(result.getStatus())
             .isEqualTo("PENDING");
+    }
+
+    // The product is read with findByIdForUpdate and not with findById: that
+    // is what stops two simultaneous checkouts from reading the same stock.
+    @Test
+    void checkout_locksTheProductBeforeReadingStock() {
+
+        User user = buildUser();
+        Cart cart = buildCart(user);
+        Product product = buildPhysicalProduct(10);
+
+        when(userRepository.findById(1L))
+            .thenReturn(Optional.of(user));
+
+        when(cartRepository.findByUserId(1L))
+            .thenReturn(Optional.of(cart));
+
+        when(
+            cartItemRepository
+                .findByCartIdOrderByIdAsc(10L)
+        ).thenReturn(
+            List.of(buildCartItem(cart, product, 1))
+        );
+
+        stubProductLock(product);
+        stubOrderSave();
+
+        orderService.checkout(1L);
+
+        verify(productRepository)
+            .findByIdForUpdate(20L);
+
+        verify(productRepository, never())
+            .findById(any());
     }
 
     @Test
@@ -223,6 +265,7 @@ class OrderServiceTest {
             List.of(buildCartItem(cart, product, 3))
         );
 
+        stubProductLock(product);
         stubOrderSave();
 
         orderService.checkout(1L);
@@ -271,6 +314,7 @@ class OrderServiceTest {
             List.of(buildCartItem(cart, product, 4))
         );
 
+        stubProductLock(product);
         stubOrderSave();
 
         orderService.checkout(1L);
@@ -300,6 +344,7 @@ class OrderServiceTest {
             List.of(buildCartItem(cart, product, 2))
         );
 
+        stubProductLock(product);
         stubOrderSave();
 
         OrderResponseDTO result =
@@ -333,6 +378,8 @@ class OrderServiceTest {
         ).thenReturn(
             List.of(buildCartItem(cart, product, 5))
         );
+
+        stubProductLock(product);
 
         assertThatThrownBy(() ->
             orderService.checkout(1L)
@@ -385,6 +432,9 @@ class OrderServiceTest {
             )
         );
 
+        stubProductLock(available);
+        stubProductLock(outOfStock);
+
         assertThatThrownBy(() ->
             orderService.checkout(1L)
         ).isInstanceOf(
@@ -420,6 +470,8 @@ class OrderServiceTest {
             List.of(buildCartItem(cart, product, 1))
         );
 
+        stubProductLock(product);
+
         assertThatThrownBy(() ->
             orderService.checkout(1L)
         ).isInstanceOf(
@@ -447,6 +499,7 @@ class OrderServiceTest {
             List.of(buildCartItem(cart, product, 1))
         );
 
+        stubProductLock(product);
         stubOrderSave();
 
         orderService.checkout(1L);
@@ -513,33 +566,56 @@ class OrderServiceTest {
     // READS
     // =========================
 
+    // The history is read with the query that brings the items along, so it
+    // doesn't run one extra query per order (the N+1 problem).
     @Test
-    void getOrdersByUser_returnsHistory() {
+    void getOrdersByUser_readsHistoryInASingleQuery() {
 
         User user = buildUser();
+        Product product = buildPhysicalProduct(10);
+
+        Order first =
+            buildOrder(user, OrderStatus.PENDING);
+
+        first.addItem(
+            buildOrderItem(product, 2, 1000.0)
+        );
+
+        Order second = new Order();
+        second.setId(101L);
+        second.setUser(user);
+        second.setStatus(OrderStatus.DELIVERED);
+        second.setTotal(5000.0);
+
+        second.addItem(
+            buildOrderItem(product, 5, 1000.0)
+        );
 
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
         when(
             orderRepository
-                .findByUserIdOrderByOrderDateDesc(1L)
-        ).thenReturn(
-            List.of(
-                buildOrder(user, OrderStatus.PENDING)
-            )
-        );
+                .findByUserIdWithItems(1L)
+        ).thenReturn(List.of(first, second));
 
         List<OrderResponseDTO> result =
             orderService.getOrdersByUser(1L);
 
-        assertThat(result).hasSize(1);
+        assertThat(result).hasSize(2);
 
-        assertThat(result.get(0).getId())
-            .isEqualTo(100L);
+        assertThat(result.get(0).getItems())
+            .hasSize(1);
 
-        assertThat(result.get(0).getStatus())
-            .isEqualTo("PENDING");
+        assertThat(result.get(1).getItems())
+            .hasSize(1);
+
+        // A single call to the repository for the whole history.
+        verify(orderRepository)
+            .findByUserIdWithItems(1L);
+
+        verify(orderRepository, never())
+            .findByUserIdOrderByOrderDateDesc(any());
     }
 
     @Test
@@ -551,22 +627,18 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
-
         // The item was bought at 800, even though the product is worth 1000
         // in the catalog today.
-        when(
-            orderItemRepository
-                .findByOrderIdOrderByIdAsc(100L)
-        ).thenReturn(
-            List.of(
-                buildOrderItem(product, 2, 800.0)
-            )
+        order.addItem(
+            buildOrderItem(product, 2, 800.0)
         );
 
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
+
         OrderResponseDTO result =
-            orderService.getOrderById(100L);
+            orderService.getOrderById(100L, 1L);
 
         assertThat(result.getItems()).hasSize(1);
 
@@ -582,12 +654,67 @@ class OrderServiceTest {
     @Test
     void getOrderById_notFound_throws() {
 
-        when(orderRepository.findById(404L))
-            .thenReturn(Optional.empty());
+        when(
+            orderRepository.findByIdWithItems(404L)
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-            orderService.getOrderById(404L)
+            orderService.getOrderById(404L, 1L)
         ).isInstanceOf(OrderNotFoundException.class);
+    }
+
+    // =========================
+    // OWNERSHIP
+    // =========================
+
+    @Test
+    void getOrderById_otherUsersOrder_throws() {
+
+        User owner = buildUser();
+
+        Order order =
+            buildOrder(owner, OrderStatus.PENDING);
+
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
+
+        // User 2 asks for an order belonging to user 1.
+        assertThatThrownBy(() ->
+            orderService.getOrderById(100L, 2L)
+        ).isInstanceOf(
+            OrderAccessDeniedException.class
+        );
+    }
+
+    @Test
+    void updateStatus_otherUsersOrder_throws() {
+
+        User owner = buildUser();
+
+        Order order =
+            buildOrder(owner, OrderStatus.PENDING);
+
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
+
+        assertThatThrownBy(() ->
+            orderService.updateStatus(
+                100L,
+                2L,
+                "PAID"
+            )
+        ).isInstanceOf(
+            OrderAccessDeniedException.class
+        );
+
+        // The state of someone else's order stays untouched.
+        assertThat(order.getStatus())
+            .isEqualTo(OrderStatus.PENDING);
+
+        verify(orderRepository, never())
+            .save(any(Order.class));
     }
 
     // =========================
@@ -602,14 +729,19 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         when(orderRepository.save(order))
             .thenReturn(order);
 
         OrderResponseDTO result =
-            orderService.updateStatus(100L, "PAID");
+            orderService.updateStatus(
+                100L,
+                1L,
+                "PAID"
+            );
 
         assertThat(order.getStatus())
             .isEqualTo(OrderStatus.PAID);
@@ -626,13 +758,18 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         when(orderRepository.save(order))
             .thenReturn(order);
 
-        orderService.updateStatus(100L, "paid");
+        orderService.updateStatus(
+            100L,
+            1L,
+            "paid"
+        );
 
         assertThat(order.getStatus())
             .isEqualTo(OrderStatus.PAID);
@@ -646,12 +783,17 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         // An order that hasn't been paid can't be shipped.
         assertThatThrownBy(() ->
-            orderService.updateStatus(100L, "SHIPPED")
+            orderService.updateStatus(
+                100L,
+                1L,
+                "SHIPPED"
+            )
         ).isInstanceOf(
             InvalidOrderStateException.class
         );
@@ -671,11 +813,16 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.DELIVERED);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
-            orderService.updateStatus(100L, "PENDING")
+            orderService.updateStatus(
+                100L,
+                1L,
+                "PENDING"
+            )
         ).isInstanceOf(
             InvalidOrderStateException.class
         );
@@ -689,11 +836,16 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
-            orderService.updateStatus(100L, "REGALADO")
+            orderService.updateStatus(
+                100L,
+                1L,
+                "REGALADO"
+            )
         ).isInstanceOf(
             InvalidOrderStateException.class
         );
@@ -707,11 +859,16 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
-            orderService.updateStatus(100L, null)
+            orderService.updateStatus(
+                100L,
+                1L,
+                null
+            )
         ).isInstanceOf(
             InvalidOrderStateException.class
         );
@@ -726,23 +883,22 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        order.addItem(
+            buildOrderItem(product, 4, 1000.0)
+        );
 
         when(
-            orderItemRepository
-                .findByOrderIdOrderByIdAsc(100L)
-        ).thenReturn(
-            List.of(
-                buildOrderItem(product, 4, 1000.0)
-            )
-        );
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
+
+        stubProductLock(product);
 
         when(orderRepository.save(order))
             .thenReturn(order);
 
         orderService.updateStatus(
             100L,
+            1L,
             "CANCELLED"
         );
 
@@ -765,23 +921,22 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        order.addItem(
+            buildOrderItem(product, 2, 5000.0)
+        );
 
         when(
-            orderItemRepository
-                .findByOrderIdOrderByIdAsc(100L)
-        ).thenReturn(
-            List.of(
-                buildOrderItem(product, 2, 5000.0)
-            )
-        );
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
+
+        stubProductLock(product);
 
         when(orderRepository.save(order))
             .thenReturn(order);
 
         orderService.updateStatus(
             100L,
+            1L,
             "CANCELLED"
         );
 
@@ -800,13 +955,19 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.SHIPPED);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        order.addItem(
+            buildOrderItem(product, 4, 1000.0)
+        );
+
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         // Once shipped the stock already left, so it can't be given back.
         assertThatThrownBy(() ->
             orderService.updateStatus(
                 100L,
+                1L,
                 "CANCELLED"
             )
         ).isInstanceOf(
@@ -827,11 +988,16 @@ class OrderServiceTest {
         Order order =
             buildOrder(user, OrderStatus.PENDING);
 
-        when(orderRepository.findById(100L))
-            .thenReturn(Optional.of(order));
+        when(
+            orderRepository.findByIdWithItems(100L)
+        ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
-            orderService.updateStatus(100L, "PENDING")
+            orderService.updateStatus(
+                100L,
+                1L,
+                "PENDING"
+            )
         ).isInstanceOf(
             InvalidOrderStateException.class
         );
@@ -840,11 +1006,16 @@ class OrderServiceTest {
     @Test
     void updateStatus_orderNotFound_throws() {
 
-        when(orderRepository.findById(404L))
-            .thenReturn(Optional.empty());
+        when(
+            orderRepository.findByIdWithItems(404L)
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-            orderService.updateStatus(404L, "PAID")
+            orderService.updateStatus(
+                404L,
+                1L,
+                "PAID"
+            )
         ).isInstanceOf(OrderNotFoundException.class);
     }
 }
