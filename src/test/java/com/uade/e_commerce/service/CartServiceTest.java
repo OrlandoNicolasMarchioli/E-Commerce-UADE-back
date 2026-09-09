@@ -194,7 +194,7 @@ class CartServiceTest {
         assertThat(savedItem.getQuantity())
             .isEqualTo(2);
 
-        // Agregar al carrito NO debe descontar stock.
+        // The stock should not be modified when adding an item to the cart
         assertThat(product.getStock())
             .isEqualTo(5);
 

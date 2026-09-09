@@ -45,10 +45,8 @@ public class CartService {
         this.userRepository = userRepository;
     }
 
-    // =========================
-    // GET CART
-    // =========================
-
+    // The cart is created lazily the first time the user requests it.
+    // This avoids creating empty carts for users who never use the feature.
     public CartResponseDTO getCart(Long userId) {
 
         User user = getUser(userId);
@@ -59,10 +57,6 @@ public class CartService {
 
         return buildResponse(cart);
     }
-
-    // =========================
-    // ADD ITEM
-    // =========================
 
     public CartResponseDTO addItem(
         Long userId,
@@ -88,6 +82,8 @@ public class CartService {
             .findByUserId(userId)
             .orElseGet(() -> createCart(user));
 
+        // There can only be one row per product and cart. If the product is
+        // already present, the requested quantity is added to the existing one.
         CartItem existingItem = cartItemRepository
             .findByCartIdAndProductId(
                 cart.getId(),
@@ -103,8 +99,8 @@ public class CartService {
         int requestedTotal =
             currentQuantity + dto.getQuantity();
 
-        // Physical products manage stock.
-        // Services don't use stock.
+        // Services don't manage stock. For physical products we validate the
+        // final quantity in the cart, not only the amount being added.
         if (product.getType() == ProductType.PHYSICAL) {
 
             int availableStock =
@@ -122,6 +118,8 @@ public class CartService {
             }
         }
 
+        // Adding an item only validates availability; it doesn't reserve or
+        // decrease stock. Stock should be updated when the order is created.
         if (existingItem == null) {
 
             CartItem cartItem = new CartItem();
@@ -142,10 +140,6 @@ public class CartService {
         return buildResponse(cart);
     }
 
-    // =========================
-    // REMOVE ITEM
-    // =========================
-
     public void removeItem(
         Long userId,
         Long productId
@@ -157,6 +151,8 @@ public class CartService {
             .findByUserId(userId)
             .orElse(null);
 
+        // Removing from a cart that doesn't exist is treated as an idempotent
+        // operation: there is simply nothing to remove.
         if (cart == null) {
             return;
         }
@@ -169,10 +165,6 @@ public class CartService {
             .ifPresent(cartItemRepository::delete);
     }
 
-    // =========================
-    // CLEAR CART
-    // =========================
-
     public void clearCart(Long userId) {
 
         getUser(userId);
@@ -181,6 +173,8 @@ public class CartService {
             .findByUserId(userId)
             .orElse(null);
 
+        // Clearing a cart that doesn't exist already satisfies the requested
+        // final state, so no error is returned.
         if (cart == null) {
             return;
         }
@@ -189,10 +183,6 @@ public class CartService {
             cart.getId()
         );
     }
-
-    // =========================
-    // HELPERS
-    // =========================
 
     private User getUser(Long userId) {
 
@@ -226,6 +216,8 @@ public class CartService {
                 .map(CartItemResponseDTO::fromEntity)
                 .collect(Collectors.toList());
 
+        // The total is calculated at response time using current product prices,
+        // so the cart always reflects the latest catalog value.
         double total =
             items
                 .stream()
