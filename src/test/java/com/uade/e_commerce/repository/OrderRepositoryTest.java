@@ -296,21 +296,6 @@ class OrderRepositoryTest {
         ).isEmpty();
     }
 
-    // The lock used by the checkout has to be able to read the product.
-    @Test
-    void findByIdForUpdate_returnsProduct() {
-
-        var result =
-            productRepository.findByIdForUpdate(
-                product.getId()
-            );
-
-        assertThat(result).isPresent();
-
-        assertThat(result.get().getStock())
-            .isEqualTo(10);
-    }
-
     @Test
     void findByUserId_userWithoutOrders_returnsEmpty() {
 

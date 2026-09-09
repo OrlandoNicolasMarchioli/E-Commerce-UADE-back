@@ -30,6 +30,8 @@ import com.uade.e_commerce.repository.OrderRepository;
 import com.uade.e_commerce.repository.ProductRepository;
 import com.uade.e_commerce.repository.UserRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 
 // Checkout is the operation that turns a cart into an order. @Transactional
@@ -46,26 +48,36 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
+    // Used to re-read a product with a lock. It's needed because a query
+    // alone isn't enough: see lockProduct().
+    private final EntityManager entityManager;
+
     public OrderService(
         OrderRepository orderRepository,
         CartRepository cartRepository,
         CartItemRepository cartItemRepository,
         ProductRepository productRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        EntityManager entityManager
     ) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.entityManager = entityManager;
     }
 
     public OrderResponseDTO checkout(Long userId) {
 
         User user = getUser(userId);
 
+        // The cart is read with a lock before anything else. Two
+        // simultaneous checkouts from the same user get serialized here: the
+        // second one only moves forward once the first has finished and
+        // emptied the cart, so it doesn't create a duplicate order.
         Cart cart = cartRepository
-            .findByUserId(userId)
+            .findByUserIdForUpdate(userId)
             .orElseThrow(() ->
                 new EmptyCartException(userId)
             );
@@ -251,18 +263,41 @@ public class OrderService {
             .forEach(productId ->
                 lockedProducts.put(
                     productId,
-                    productRepository
-                        .findByIdForUpdate(productId)
-                        .orElseThrow(() ->
-                            new ProductNotFoundException(
-                                "Producto no encontrado con id: " +
-                                productId
-                            )
-                        )
+                    lockProduct(productId)
                 )
             );
 
         return lockedProducts;
+    }
+
+    // Reads the product blocking its row until the transaction ends
+    // (SELECT ... FOR UPDATE), and above all refreshing what's in memory.
+    //
+    // The refresh is the important part. CartItem and OrderItem point at
+    // Product with an EAGER @ManyToOne, so by this point the product is
+    // already loaded in memory. If the lock were taken with a plain query,
+    // JPA would return that already loaded copy and throw away the row it
+    // just read: the stock would be validated and discounted against an
+    // outdated value, which is exactly the problem the lock is meant to
+    // avoid. refresh() overwrites the in-memory state with the one in the
+    // database.
+    private Product lockProduct(Long productId) {
+
+        Product product = productRepository
+            .findById(productId)
+            .orElseThrow(() ->
+                new ProductNotFoundException(
+                    "Producto no encontrado con id: " +
+                    productId
+                )
+            );
+
+        entityManager.refresh(
+            product,
+            LockModeType.PESSIMISTIC_WRITE
+        );
+
+        return product;
     }
 
     // Services (lessons, courses) have no stock to control: they can be sold
@@ -323,17 +358,9 @@ public class OrderService {
         // lock: giving stock back also reads and writes it.
         for (OrderItem orderItem : order.getItems()) {
 
-            Product product =
-                productRepository
-                    .findByIdForUpdate(
-                        orderItem.getProduct().getId()
-                    )
-                    .orElseThrow(() ->
-                        new ProductNotFoundException(
-                            "Producto no encontrado con id: " +
-                            orderItem.getProduct().getId()
-                        )
-                    );
+            Product product = lockProduct(
+                orderItem.getProduct().getId()
+            );
 
             applyStock(
                 product,

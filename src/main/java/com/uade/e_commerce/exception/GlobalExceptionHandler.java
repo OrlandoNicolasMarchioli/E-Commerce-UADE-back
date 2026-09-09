@@ -3,6 +3,7 @@ package com.uade.e_commerce.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -149,6 +150,22 @@ public class GlobalExceptionHandler {
         DuplicateReviewException ex
     ) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    // The database rejects the operation because another record depends on
+    // the one being touched: typically deleting a product that already has
+    // orders, reviews or images. Without this handler it would fall into the
+    // catch-all and come out as a 500, as if the server had failed, when in
+    // fact the request can't be fulfilled with the data as it stands.
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(
+        DataIntegrityViolationException ex
+    ) {
+        return buildResponse(
+            HttpStatus.CONFLICT,
+            "No se puede completar la operación porque existen registros " +
+                "asociados que dependen de este recurso"
+        );
     }
 
     // =========================

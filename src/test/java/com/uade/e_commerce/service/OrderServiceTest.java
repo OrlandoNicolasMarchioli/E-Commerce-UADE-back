@@ -38,6 +38,9 @@ import com.uade.e_commerce.repository.OrderRepository;
 import com.uade.e_commerce.repository.ProductRepository;
 import com.uade.e_commerce.repository.UserRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
@@ -55,6 +58,9 @@ class OrderServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private OrderService orderService;
@@ -147,7 +153,7 @@ class OrderServiceTest {
     // The checkout re-reads each product with a lock before touching it.
     private void stubProductLock(Product product) {
         when(
-            productRepository.findByIdForUpdate(
+            productRepository.findById(
                 product.getId()
             )
         ).thenReturn(Optional.of(product));
@@ -167,7 +173,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -211,10 +217,11 @@ class OrderServiceTest {
             .isEqualTo("PENDING");
     }
 
-    // The product is read with findByIdForUpdate and not with findById: that
-    // is what stops two simultaneous checkouts from reading the same stock.
+    // The product is re-read with a lock before its stock is looked at: that
+    // is what stops two simultaneous checkouts from working on the same
+    // value.
     @Test
-    void checkout_locksTheProductBeforeReadingStock() {
+    void checkout_refreshesTheProductUnderLock() {
 
         User user = buildUser();
         Cart cart = buildCart(user);
@@ -223,7 +230,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -238,11 +245,15 @@ class OrderServiceTest {
 
         orderService.checkout(1L);
 
-        verify(productRepository)
-            .findByIdForUpdate(20L);
+        // Taking the lock is not enough: what's in memory has to be
+        // refreshed, otherwise the stock would be read from an outdated copy.
+        verify(entityManager).refresh(
+            product,
+            LockModeType.PESSIMISTIC_WRITE
+        );
 
-        verify(productRepository, never())
-            .findById(any());
+        verify(cartRepository)
+            .findByUserIdForUpdate(1L);
     }
 
     @Test
@@ -255,7 +266,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -304,7 +315,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -334,7 +345,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -369,7 +380,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -419,7 +430,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -460,7 +471,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -489,7 +500,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -517,7 +528,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.of(cart));
 
         when(
@@ -541,7 +552,7 @@ class OrderServiceTest {
         when(userRepository.findById(1L))
             .thenReturn(Optional.of(user));
 
-        when(cartRepository.findByUserId(1L))
+        when(cartRepository.findByUserIdForUpdate(1L))
             .thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->

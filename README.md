@@ -202,8 +202,8 @@ El checkout es la operación que convierte un carrito en un pedido. Se ejecuta c
 
 Al confirmar la compra, el sistema:
 
-1. Verifica que el carrito exista y tenga al menos un ítem.
-2. Bloquea los productos involucrados hasta el final de la operación.
+1. Bloquea el carrito y verifica que tenga al menos un ítem.
+2. Bloquea los productos involucrados y vuelve a leer su stock.
 3. Valida el stock de **todos** los ítems antes de modificar ninguno, para que un producto sin stock al final del carrito no deje a los anteriores ya descontados.
 4. Crea el pedido en estado `PENDING`, copiando en cada ítem el nombre y el precio del producto.
 5. Descuenta el stock de los productos físicos.
@@ -212,7 +212,11 @@ Al confirmar la compra, el sistema:
 
 El stock se valida nuevamente en este punto, aunque el carrito ya lo haya hecho al agregar el ítem: entre ambos momentos puede haber pasado tiempo y otro usuario puede haberse llevado esas unidades.
 
-El bloqueo del paso 2 resuelve un problema distinto. Descontar stock implica leerlo, restarle una cantidad y volver a guardarlo; si dos compras hacen eso a la vez, ambas leen el mismo valor inicial y una termina pisando el descuento de la otra. Leyendo los productos con un bloqueo de escritura, la segunda compra espera a que la primera termine y trabaja sobre el stock ya actualizado. Los bloqueos se toman siempre ordenados por identificador de producto, para que dos compras simultáneas no queden esperándose mutuamente.
+Los bloqueos de los pasos 1 y 2 resuelven problemas distintos, ambos de concurrencia.
+
+El del **carrito** evita que una misma compra se confirme dos veces. Si el usuario hace doble clic en "comprar", las dos peticiones llegan casi a la vez y ambas encontrarían el carrito lleno, generando dos pedidos por la misma mercadería. Con el bloqueo, la segunda espera a que la primera termine y para entonces el carrito ya está vacío.
+
+El de los **productos** protege el stock. Descontarlo implica leerlo, restarle una cantidad y volver a guardarlo; si dos compras hacen eso a la vez, ambas leen el mismo valor inicial y una termina pisando el descuento de la otra. Además de tomar el bloqueo, el stock se vuelve a leer desde la base de datos: el producto ya está cargado en memoria desde el carrito, y sin ese refresco se validaría contra un valor viejo, que es justamente lo que el bloqueo busca evitar. Los bloqueos se toman siempre ordenados por identificador de producto, para que dos compras simultáneas no queden esperándose mutuamente.
 
 Los productos de tipo `SERVICE` (clases, cursos) no manejan stock, por lo que no se validan ni se descuentan.
 
@@ -253,7 +257,7 @@ La cancelación no tiene un endpoint propio: es un cambio de estado más y se re
 | `400` | Carrito vacío, estado inexistente o transición no permitida |
 | `403` | El pedido no pertenece al usuario que realiza la consulta |
 | `404` | Pedido o usuario inexistente |
-| `409` | Stock insuficiente al confirmar la compra |
+| `409` | Stock insuficiente al confirmar la compra, o intento de eliminar un producto que ya fue vendido |
 
 Un pedido no se elimina: es un registro histórico de una operación. Por eso no existe un `DELETE` de pedidos, y un producto que ya fue vendido no puede borrarse, ya que sus ítems de pedido lo referencian.
 
