@@ -6,8 +6,12 @@ import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 // Centralizes translating exceptions into HTTP responses, so controllers
 // don't get cluttered with try/catch and every error comes out in the same
@@ -116,6 +120,63 @@ public class GlobalExceptionHandler {
         IllegalArgumentException ex
     ) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    // The three handlers below cover malformed requests. Spring already
+    // turns these into a 400 on its own, but the catch-all at the bottom of
+    // this class intercepts them first and turns them into a 500, which
+    // tells the client that the server failed when what was wrong was the
+    // request. They're declared explicitly so the right status comes back.
+
+    // A parameter that can't be converted: /api/orders?userId=abc
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
+        MethodArgumentTypeMismatchException ex
+    ) {
+        return buildResponse(
+            HttpStatus.BAD_REQUEST,
+            "El parámetro '" +
+                ex.getName() +
+                "' tiene un valor inválido: " +
+                ex.getValue()
+        );
+    }
+
+    // A required parameter that never arrived: /api/orders without userId
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParameter(
+        MissingServletRequestParameterException ex
+    ) {
+        return buildResponse(
+            HttpStatus.BAD_REQUEST,
+            "Falta el parámetro obligatorio: " + ex.getParameterName()
+        );
+    }
+
+    // A body that isn't valid JSON, or that doesn't match the expected DTO.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadableBody(
+        HttpMessageNotReadableException ex
+    ) {
+        return buildResponse(
+            HttpStatus.BAD_REQUEST,
+            "El cuerpo de la petición no se pudo leer. " +
+                "Verificá que sea un JSON válido"
+        );
+    }
+
+    // =========================
+    // 405 - METHOD NOT ALLOWED
+    // =========================
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodNotSupported(
+        HttpRequestMethodNotSupportedException ex
+    ) {
+        return buildResponse(
+            HttpStatus.METHOD_NOT_ALLOWED,
+            "El método " + ex.getMethod() + " no está permitido en esta ruta"
+        );
     }
 
     // =========================

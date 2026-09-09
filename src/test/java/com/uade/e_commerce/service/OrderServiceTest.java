@@ -708,7 +708,7 @@ class OrderServiceTest {
             buildOrder(owner, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
@@ -742,7 +742,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         when(orderRepository.save(order))
@@ -771,7 +771,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         when(orderRepository.save(order))
@@ -796,7 +796,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         // An order that hasn't been paid can't be shipped.
@@ -826,7 +826,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.DELIVERED);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
@@ -849,7 +849,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
@@ -872,7 +872,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
@@ -900,7 +900,7 @@ class OrderServiceTest {
         );
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         stubProductLock(product);
@@ -938,7 +938,7 @@ class OrderServiceTest {
         );
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         stubProductLock(product);
@@ -972,7 +972,7 @@ class OrderServiceTest {
         );
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         // Once shipped the stock already left, so it can't be given back.
@@ -1001,7 +1001,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         when(
-            orderRepository.findByIdWithItems(100L)
+            orderRepository.findByIdForUpdate(100L)
         ).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() ->
@@ -1015,11 +1015,38 @@ class OrderServiceTest {
         );
     }
 
+    // The order is read with a lock before its status is looked at. Without
+    // it, two simultaneous cancellations would both read PENDING and both
+    // give the stock back, duplicating it.
+    @Test
+    void updateStatus_readsTheOrderUnderLock() {
+
+        User user = buildUser();
+
+        Order order =
+            buildOrder(user, OrderStatus.PENDING);
+
+        when(
+            orderRepository.findByIdForUpdate(100L)
+        ).thenReturn(Optional.of(order));
+
+        when(orderRepository.save(order))
+            .thenReturn(order);
+
+        orderService.updateStatus(100L, 1L, "PAID");
+
+        verify(orderRepository)
+            .findByIdForUpdate(100L);
+
+        verify(orderRepository, never())
+            .findByIdWithItems(any());
+    }
+
     @Test
     void updateStatus_orderNotFound_throws() {
 
         when(
-            orderRepository.findByIdWithItems(404L)
+            orderRepository.findByIdForUpdate(404L)
         ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->

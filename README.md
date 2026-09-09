@@ -162,6 +162,14 @@ Dos detalles a tener en cuenta al trabajar con este tipo:
 - Las comparaciones se hacen con `compareTo` y no con `equals`, porque `equals` también compara la escala y considera que `800.0` es distinto de `800.00`. En los tests se usa `isEqualByComparingTo` por la misma razón.
 - Las sumas se hacen con `add` y `multiply`; convertir a `double` en el medio para hacer una cuenta reintroduce exactamente el error que este tipo evita.
 
+> **Atención al actualizar una base de datos existente.** El proyecto usa `spring.jpa.hibernate.ddl-auto=update`, que crea tablas y columnas nuevas pero **no cambia el tipo de una columna que ya existe**. Las tablas `orders` y `order_items` son nuevas y se crean correctamente, pero `products.price` ya existía como `DOUBLE` en las bases anteriores y va a seguir siéndolo, con lo cual el problema de precisión se mantendría en el catálogo. Sobre una base ya creada hay que ejecutar el cambio a mano:
+>
+> ```sql
+> ALTER TABLE products MODIFY price DECIMAL(12,2) NOT NULL;
+> ```
+>
+> Si la base se crea desde cero, no hace falta.
+
 ### Reseña
 
 Permite que los usuarios califiquen y comenten productos.

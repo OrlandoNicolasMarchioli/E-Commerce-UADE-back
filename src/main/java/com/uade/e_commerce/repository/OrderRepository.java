@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.uade.e_commerce.model.Order;
+
+import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -37,6 +40,22 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "where o.id = :orderId"
     )
     Optional<Order> findByIdWithItems(
+        @Param("orderId") Long orderId
+    );
+
+    // Reads the order blocking its row until the transaction ends. It's used
+    // when changing the status: two simultaneous changes over the same order
+    // (a double click on cancel, for instance) would both read the previous
+    // status, both consider the transition valid, and both give the stock
+    // back. With the lock the second one waits and, by then, it already sees
+    // the new status.
+    //
+    // It doesn't bring the items: locking and fetching a collection in the
+    // same query isn't supported the same way by every database. The items
+    // are loaded afterwards, already inside the lock.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select o from Order o where o.id = :orderId")
+    Optional<Order> findByIdForUpdate(
         @Param("orderId") Long orderId
     );
 

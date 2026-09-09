@@ -199,7 +199,17 @@ public class OrderService {
         String newStatus
     ) {
 
-        Order order = getOrderOwnedBy(orderId, userId);
+        // The order is read with a lock before looking at its status. Without
+        // it, two simultaneous changes over the same order would both read
+        // the previous status and both be applied: cancelling twice would
+        // give the stock back twice.
+        Order order = orderRepository
+            .findByIdForUpdate(orderId)
+            .orElseThrow(() ->
+                new OrderNotFoundException(orderId)
+            );
+
+        checkOwnership(order, userId);
 
         OrderStatus target = parseStatus(newStatus);
 
@@ -238,16 +248,24 @@ public class OrderService {
 
         Order order = getOrder(orderId);
 
+        checkOwnership(order, userId);
+
+        return order;
+    }
+
+    private void checkOwnership(
+        Order order,
+        Long userId
+    ) {
+
         if (
             !order.getUser().getId().equals(userId)
         ) {
             throw new OrderAccessDeniedException(
-                orderId,
+                order.getId(),
                 userId
             );
         }
-
-        return order;
     }
 
     // The locks are taken ordered by product id so that two simultaneous
