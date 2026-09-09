@@ -24,7 +24,8 @@ public class Cart {
     @Column(name = "cart_id")
     private Long id;
 
-    // Each user has one cart.
+    // Each user has a single cart. The unique constraint prevents creating
+    // multiple carts for the same user.
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;

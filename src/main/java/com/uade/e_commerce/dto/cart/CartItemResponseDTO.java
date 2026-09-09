@@ -17,6 +17,9 @@ public class CartItemResponseDTO {
     private Double unitPrice;
     private Double subtotal;
 
+    // Price and subtotal are calculated from the current Product price.
+    // They aren't stored in CartItem because the cart doesn't freeze prices;
+    // that should happen later when an order is created.
     public static CartItemResponseDTO fromEntity(CartItem cartItem) {
 
         Double unitPrice = cartItem.getProduct().getPrice();

@@ -34,6 +34,8 @@ public class CartItem {
     @Column(nullable = false)
     private Integer quantity;
 
+    // Every item belongs to one cart. LAZY avoids loading the cart unless
+    // the relationship is actually accessed.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
