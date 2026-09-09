@@ -1,5 +1,6 @@
 package com.uade.e_commerce.dto.order;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,5 +21,5 @@ public class OrderResponseDTO {
     private LocalDateTime orderDate;
     private String status;
     private List<OrderItemResponseDTO> items;
-    private Double total;
+    private BigDecimal total;
 }

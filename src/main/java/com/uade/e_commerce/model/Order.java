@@ -1,5 +1,6 @@
 package com.uade.e_commerce.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +62,8 @@ public class Order {
     // The total is persisted instead of being recalculated like in the cart,
     // because it's the amount actually charged. It also lets the order
     // history be listed without loading every item of every order.
-    @Column(nullable = false)
-    private Double total;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal total;
 
     // CascadeType.ALL lets the whole order be saved with a single save():
     // the items go along with it. orphanRemoval means an item taken out of

@@ -1,5 +1,6 @@
 package com.uade.e_commerce.service;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +119,7 @@ public class OrderService {
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
 
-        double total = 0.0;
+        BigDecimal total = BigDecimal.ZERO;
 
         // Second pass: now the order is actually built and stock is applied.
         for (CartItem cartItem : cartItems) {
@@ -140,8 +141,15 @@ public class OrderService {
 
             order.addItem(orderItem);
 
-            total +=
-                product.getPrice() * cartItem.getQuantity();
+            total = total.add(
+                product
+                    .getPrice()
+                    .multiply(
+                        BigDecimal.valueOf(
+                            cartItem.getQuantity()
+                        )
+                    )
+            );
 
             applyStock(
                 product,

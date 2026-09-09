@@ -1,5 +1,6 @@
 package com.uade.e_commerce.service;
 
+import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +40,7 @@ class ProductServiceTest {
         product.setId(id);
         product.setName(name);
         product.setDescription("desc");
-        product.setPrice(100.0);
+        product.setPrice(new BigDecimal("100.00"));
         product.setType(ProductType.PHYSICAL);
         product.setStock(10);
         Category category = new Category(1L, "Cursos", null);
@@ -104,7 +105,7 @@ class ProductServiceTest {
         Product changes = new Product();
         changes.setName("Nombre nuevo");
         changes.setDescription("desc nueva");
-        changes.setPrice(200.0);
+        changes.setPrice(new BigDecimal("200.00"));
         changes.setType(ProductType.SERVICE);
         changes.setStock(5);
         changes.setMinutesDuration(30);
@@ -119,7 +120,7 @@ class ProductServiceTest {
         Product result = productService.updateProduct(1L, changes);
 
         assertThat(result.getName()).isEqualTo("Nombre nuevo");
-        assertThat(result.getPrice()).isEqualTo(200.0);
+        assertThat(result.getPrice()).isEqualByComparingTo("200.00");
         assertThat(result.getType()).isEqualTo(ProductType.SERVICE);
         assertThat(result.getCategory().getId()).isEqualTo(2L);
         assertThat(result.getPublisher()).isEqualTo(originalPublisher);

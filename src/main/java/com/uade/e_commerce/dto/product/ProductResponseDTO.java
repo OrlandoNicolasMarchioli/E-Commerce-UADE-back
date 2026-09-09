@@ -1,5 +1,7 @@
 package com.uade.e_commerce.dto.product;
 
+import java.math.BigDecimal;
+
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.dto.category.CategoryResponseDTO;
 import com.uade.e_commerce.model.ProductType;
@@ -16,7 +18,7 @@ public class ProductResponseDTO {
     private Long id;
     private String name;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private ProductType type;
     private Integer stock;
     private Integer minutesDuration;

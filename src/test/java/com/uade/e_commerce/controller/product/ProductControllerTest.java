@@ -1,5 +1,6 @@
 package com.uade.e_commerce.controller.product;
 
+import java.math.BigDecimal;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +52,7 @@ class ProductControllerTest {
         product.setId(1L);
         product.setName("Notebook");
         product.setDescription("desc");
-        product.setPrice(100.0);
+        product.setPrice(new BigDecimal("100.00"));
         product.setType(ProductType.PHYSICAL);
         product.setStock(5);
         product.setCategory(new Category(1L, "Tecnología", null));

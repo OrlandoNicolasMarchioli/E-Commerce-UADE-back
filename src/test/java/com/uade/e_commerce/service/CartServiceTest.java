@@ -1,5 +1,6 @@
 package com.uade.e_commerce.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,7 +69,7 @@ class CartServiceTest {
         Product product = new Product();
         product.setId(20L);
         product.setName("Cuaderno");
-        product.setPrice(1000.0);
+        product.setPrice(new BigDecimal("1000.00"));
         product.setType(ProductType.PHYSICAL);
         product.setStock(stock);
         return product;
@@ -110,7 +111,7 @@ class CartServiceTest {
         assertThat(result.getId()).isEqualTo(10L);
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getItems()).isEmpty();
-        assertThat(result.getTotal()).isEqualTo(0.0);
+        assertThat(result.getTotal()).isEqualByComparingTo("0.00");
     }
 
     @Test
@@ -250,7 +251,7 @@ class CartServiceTest {
             .isEqualTo(5);
 
         assertThat(result.getTotal())
-            .isEqualTo(5000.0);
+            .isEqualByComparingTo("5000.00");
 
         verify(cartItemRepository)
             .save(existingItem);
@@ -346,7 +347,7 @@ class CartServiceTest {
         Product service = new Product();
         service.setId(20L);
         service.setName("Clase particular");
-        service.setPrice(5000.0);
+        service.setPrice(new BigDecimal("5000.00"));
         service.setType(ProductType.SERVICE);
         service.setStock(null);
 

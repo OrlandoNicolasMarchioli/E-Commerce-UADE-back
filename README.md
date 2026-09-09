@@ -151,6 +151,17 @@ Contiene:
 
 A diferencia del ítem de carrito, que toma el precio actual del catálogo, el ítem de pedido guarda su propia copia del precio y del nombre. Así, si un producto cambia de precio o se renombra, los pedidos anteriores siguen reflejando lo que el usuario efectivamente compró. El subtotal no se almacena: al ser cantidad × precio unitario, se calcula en la respuesta para que no pueda quedar desincronizado.
 
+### Importes
+
+Todos los valores monetarios del sistema usan `BigDecimal` y se guardan como `DECIMAL(12,2)`.
+
+El motivo es que `double` no puede representar de forma exacta la mayoría de los importes con centavos, y el error se vuelve visible apenas se multiplica: tres unidades de un producto de $8.35 daban $25.049999999999997 en lugar de $25.05. Con `BigDecimal` el cálculo es exacto.
+
+Dos detalles a tener en cuenta al trabajar con este tipo:
+
+- Las comparaciones se hacen con `compareTo` y no con `equals`, porque `equals` también compara la escala y considera que `800.0` es distinto de `800.00`. En los tests se usa `isEqualByComparingTo` por la misma razón.
+- Las sumas se hacen con `add` y `multiply`; convertir a `double` en el medio para hacer una cuenta reintroduce exactamente el error que este tipo evita.
+
 ### Reseña
 
 Permite que los usuarios califiquen y comenten productos.

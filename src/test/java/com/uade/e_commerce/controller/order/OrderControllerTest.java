@@ -1,5 +1,6 @@
 package com.uade.e_commerce.controller.order;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,8 +46,8 @@ class OrderControllerTest {
                 20L,
                 "Cuaderno",
                 2,
-                1000.0,
-                2000.0
+                new BigDecimal("1000.00"),
+                new BigDecimal("2000.00")
             );
 
         return new OrderResponseDTO(
@@ -55,7 +56,7 @@ class OrderControllerTest {
             LocalDateTime.now(),
             status,
             List.of(item),
-            2000.0
+            new BigDecimal("2000.00")
         );
     }
 

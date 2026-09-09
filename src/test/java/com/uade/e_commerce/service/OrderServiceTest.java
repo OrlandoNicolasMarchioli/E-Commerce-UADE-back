@@ -1,5 +1,6 @@
 package com.uade.e_commerce.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +85,7 @@ class OrderServiceTest {
         Product product = new Product();
         product.setId(20L);
         product.setName("Cuaderno");
-        product.setPrice(1000.0);
+        product.setPrice(new BigDecimal("1000.00"));
         product.setType(ProductType.PHYSICAL);
         product.setStock(stock);
         return product;
@@ -94,7 +95,7 @@ class OrderServiceTest {
         Product product = new Product();
         product.setId(30L);
         product.setName("Clase particular");
-        product.setPrice(5000.0);
+        product.setPrice(new BigDecimal("5000.00"));
         product.setType(ProductType.SERVICE);
         product.setStock(null);
         return product;
@@ -121,14 +122,14 @@ class OrderServiceTest {
         order.setId(100L);
         order.setUser(user);
         order.setStatus(status);
-        order.setTotal(2000.0);
+        order.setTotal(new BigDecimal("2000.00"));
         return order;
     }
 
     private OrderItem buildOrderItem(
         Product product,
         Integer quantity,
-        Double unitPrice
+        BigDecimal unitPrice
     ) {
         OrderItem orderItem = new OrderItem();
         orderItem.setId(200L);
@@ -200,7 +201,7 @@ class OrderServiceTest {
             .isEqualTo(OrderStatus.PENDING);
 
         assertThat(savedOrder.getTotal())
-            .isEqualTo(2000.0);
+            .isEqualByComparingTo("2000.00");
 
         assertThat(savedOrder.getItems())
             .hasSize(1);
@@ -210,7 +211,7 @@ class OrderServiceTest {
 
         assertThat(result.getId()).isEqualTo(100L);
         assertThat(result.getUserId()).isEqualTo(1L);
-        assertThat(result.getTotal()).isEqualTo(2000.0);
+        assertThat(result.getTotal()).isEqualByComparingTo("2000.00");
         assertThat(result.getItems()).hasSize(1);
 
         assertThat(result.getStatus())
@@ -292,7 +293,7 @@ class OrderServiceTest {
         // The price travels as a copy: this is what makes the order stop
         // depending on later catalog changes.
         assertThat(savedItem.getUnitPrice())
-            .isEqualTo(1000.0);
+            .isEqualByComparingTo("1000.00");
 
         assertThat(savedItem.getProductName())
             .isEqualTo("Cuaderno");
@@ -364,7 +365,7 @@ class OrderServiceTest {
         assertThat(product.getStock()).isNull();
 
         assertThat(result.getTotal())
-            .isEqualTo(10000.0);
+            .isEqualByComparingTo("10000.00");
 
         verify(productRepository, never())
             .save(any(Product.class));
@@ -423,7 +424,7 @@ class OrderServiceTest {
         Product outOfStock = new Product();
         outOfStock.setId(21L);
         outOfStock.setName("Mochila");
-        outOfStock.setPrice(3000.0);
+        outOfStock.setPrice(new BigDecimal("3000.00"));
         outOfStock.setType(ProductType.PHYSICAL);
         outOfStock.setStock(0);
 
@@ -589,17 +590,17 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         first.addItem(
-            buildOrderItem(product, 2, 1000.0)
+            buildOrderItem(product, 2, new BigDecimal("1000.00"))
         );
 
         Order second = new Order();
         second.setId(101L);
         second.setUser(user);
         second.setStatus(OrderStatus.DELIVERED);
-        second.setTotal(5000.0);
+        second.setTotal(new BigDecimal("5000.00"));
 
         second.addItem(
-            buildOrderItem(product, 5, 1000.0)
+            buildOrderItem(product, 5, new BigDecimal("1000.00"))
         );
 
         when(userRepository.findById(1L))
@@ -641,7 +642,7 @@ class OrderServiceTest {
         // The item was bought at 800, even though the product is worth 1000
         // in the catalog today.
         order.addItem(
-            buildOrderItem(product, 2, 800.0)
+            buildOrderItem(product, 2, new BigDecimal("800.00"))
         );
 
         when(
@@ -655,11 +656,11 @@ class OrderServiceTest {
 
         assertThat(
             result.getItems().get(0).getUnitPrice()
-        ).isEqualTo(800.0);
+        ).isEqualByComparingTo("800.00");
 
         assertThat(
             result.getItems().get(0).getSubtotal()
-        ).isEqualTo(1600.0);
+        ).isEqualByComparingTo("1600.00");
     }
 
     @Test
@@ -895,7 +896,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         order.addItem(
-            buildOrderItem(product, 4, 1000.0)
+            buildOrderItem(product, 4, new BigDecimal("1000.00"))
         );
 
         when(
@@ -933,7 +934,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.PENDING);
 
         order.addItem(
-            buildOrderItem(product, 2, 5000.0)
+            buildOrderItem(product, 2, new BigDecimal("5000.00"))
         );
 
         when(
@@ -967,7 +968,7 @@ class OrderServiceTest {
             buildOrder(user, OrderStatus.SHIPPED);
 
         order.addItem(
-            buildOrderItem(product, 4, 1000.0)
+            buildOrderItem(product, 4, new BigDecimal("1000.00"))
         );
 
         when(

@@ -1,5 +1,6 @@
 package com.uade.e_commerce.repository;
 
+import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -48,7 +49,7 @@ class ReviewRepositoryTest {
 
         product = new Product();
         product.setName("Notebook");
-        product.setPrice(100.0);
+        product.setPrice(new BigDecimal("100.00"));
         product.setType(ProductType.PHYSICAL);
         product.setCategory(category);
         product.setPublisher(publisher);

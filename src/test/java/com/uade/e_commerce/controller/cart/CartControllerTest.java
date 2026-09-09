@@ -1,5 +1,6 @@
 package com.uade.e_commerce.controller.cart;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -40,15 +41,15 @@ class CartControllerTest {
                 20L,
                 "Cuaderno",
                 2,
-                1000.0,
-                2000.0
+                new BigDecimal("1000.00"),
+                new BigDecimal("2000.00")
             );
 
         return new CartResponseDTO(
             10L,
             1L,
             List.of(item),
-            2000.0
+            new BigDecimal("2000.00")
         );
     }
 

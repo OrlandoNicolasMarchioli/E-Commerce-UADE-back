@@ -1,5 +1,6 @@
 package com.uade.e_commerce.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -218,13 +219,18 @@ public class CartService {
 
         // The total is calculated at response time using current product prices,
         // so the cart always reflects the latest catalog value.
-        double total =
+        //
+        // With BigDecimal the sum goes through reduce(): there's no
+        // mapToDouble equivalent, and going through double would bring back
+        // exactly the rounding errors this type avoids.
+        BigDecimal total =
             items
                 .stream()
-                .mapToDouble(
-                    CartItemResponseDTO::getSubtotal
-                )
-                .sum();
+                .map(CartItemResponseDTO::getSubtotal)
+                .reduce(
+                    BigDecimal.ZERO,
+                    BigDecimal::add
+                );
 
         return new CartResponseDTO(
             cart.getId(),

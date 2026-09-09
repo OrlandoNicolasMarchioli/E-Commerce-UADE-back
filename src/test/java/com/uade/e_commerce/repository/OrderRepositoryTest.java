@@ -1,5 +1,6 @@
 package com.uade.e_commerce.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -73,7 +74,7 @@ class OrderRepositoryTest {
 
         newProduct.setName("Cuaderno");
         newProduct.setDescription("Cuaderno A4");
-        newProduct.setPrice(1000.0);
+        newProduct.setPrice(new BigDecimal("1000.00"));
         newProduct.setType(ProductType.PHYSICAL);
         newProduct.setStock(10);
         newProduct.setCategory(category);
@@ -84,7 +85,7 @@ class OrderRepositoryTest {
 
     private Order buildOrder(
         LocalDateTime date,
-        Double total
+        BigDecimal total
     ) {
 
         Order order = new Order();
@@ -99,7 +100,7 @@ class OrderRepositoryTest {
 
     private OrderItem buildOrderItem(
         Integer quantity,
-        Double unitPrice
+        BigDecimal unitPrice
     ) {
 
         OrderItem orderItem = new OrderItem();
@@ -119,11 +120,11 @@ class OrderRepositoryTest {
 
         Order order = buildOrder(
             LocalDateTime.now(),
-            3000.0
+            new BigDecimal("3000.00")
         );
 
-        order.addItem(buildOrderItem(2, 1000.0));
-        order.addItem(buildOrderItem(1, 1000.0));
+        order.addItem(buildOrderItem(2, new BigDecimal("1000.00")));
+        order.addItem(buildOrderItem(1, new BigDecimal("1000.00")));
 
         Order saved = orderRepository.save(order);
 
@@ -150,14 +151,14 @@ class OrderRepositoryTest {
 
         Order order = buildOrder(
             LocalDateTime.now(),
-            1600.0
+            new BigDecimal("1600.00")
         );
 
-        order.addItem(buildOrderItem(2, 800.0));
+        order.addItem(buildOrderItem(2, new BigDecimal("800.00")));
 
         Order saved = orderRepository.save(order);
 
-        product.setPrice(2500.0);
+        product.setPrice(new BigDecimal("2500.00"));
         productRepository.save(product);
 
         OrderItem item =
@@ -168,7 +169,7 @@ class OrderRepositoryTest {
                 .get(0);
 
         assertThat(item.getUnitPrice())
-            .isEqualTo(800.0);
+            .isEqualByComparingTo("800.00");
 
         assertThat(item.getProductName())
             .isEqualTo("Cuaderno");
@@ -180,14 +181,14 @@ class OrderRepositoryTest {
         orderRepository.save(
             buildOrder(
                 LocalDateTime.now().minusDays(2),
-                1000.0
+                new BigDecimal("1000.00")
             )
         );
 
         orderRepository.save(
             buildOrder(
                 LocalDateTime.now(),
-                2000.0
+                new BigDecimal("2000.00")
             )
         );
 
@@ -200,10 +201,10 @@ class OrderRepositoryTest {
         assertThat(result).hasSize(2);
 
         assertThat(result.get(0).getTotal())
-            .isEqualTo(2000.0);
+            .isEqualByComparingTo("2000.00");
 
         assertThat(result.get(1).getTotal())
-            .isEqualTo(1000.0);
+            .isEqualByComparingTo("1000.00");
     }
 
     // The JOIN FETCH has to bring the order together with its items in a
@@ -214,11 +215,11 @@ class OrderRepositoryTest {
 
         Order order = buildOrder(
             LocalDateTime.now(),
-            3000.0
+            new BigDecimal("3000.00")
         );
 
-        order.addItem(buildOrderItem(2, 1000.0));
-        order.addItem(buildOrderItem(1, 1000.0));
+        order.addItem(buildOrderItem(2, new BigDecimal("1000.00")));
+        order.addItem(buildOrderItem(1, new BigDecimal("1000.00")));
 
         orderRepository.save(order);
 
@@ -239,14 +240,14 @@ class OrderRepositoryTest {
         orderRepository.save(
             buildOrder(
                 LocalDateTime.now().minusDays(2),
-                1000.0
+                new BigDecimal("1000.00")
             )
         );
 
         orderRepository.save(
             buildOrder(
                 LocalDateTime.now(),
-                2000.0
+                new BigDecimal("2000.00")
             )
         );
 
@@ -258,7 +259,7 @@ class OrderRepositoryTest {
         assertThat(result).hasSize(2);
 
         assertThat(result.get(0).getTotal())
-            .isEqualTo(2000.0);
+            .isEqualByComparingTo("2000.00");
     }
 
     @Test
@@ -266,10 +267,10 @@ class OrderRepositoryTest {
 
         Order order = buildOrder(
             LocalDateTime.now(),
-            2000.0
+            new BigDecimal("2000.00")
         );
 
-        order.addItem(buildOrderItem(2, 1000.0));
+        order.addItem(buildOrderItem(2, new BigDecimal("1000.00")));
 
         Order saved = orderRepository.save(order);
 
@@ -313,7 +314,7 @@ class OrderRepositoryTest {
 
         Order order = buildOrder(
             LocalDateTime.now(),
-            1000.0
+            new BigDecimal("1000.00")
         );
 
         order.setStatus(OrderStatus.DELIVERED);
