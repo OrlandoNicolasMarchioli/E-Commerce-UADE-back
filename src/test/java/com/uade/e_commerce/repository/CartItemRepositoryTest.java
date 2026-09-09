@@ -1,5 +1,6 @@
 package com.uade.e_commerce.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,7 +73,7 @@ class CartItemRepositoryTest {
         product.setDescription(
             "Cuaderno universitario"
         );
-        product.setPrice(1000.0);
+        product.setPrice(new BigDecimal("1000.00"));
         product.setType(ProductType.PHYSICAL);
         product.setStock(10);
         product.setCategory(category);

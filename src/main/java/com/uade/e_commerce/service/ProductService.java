@@ -1,5 +1,6 @@
 package com.uade.e_commerce.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -42,7 +43,9 @@ public class ProductService {
     }
 
     public Product createProduct(Product product) {
-        if (product.getPrice() < 0) {
+        // compareTo and not equals: BigDecimal.equals also compares the
+        // scale, so 0.00 wouldn't be equal to 0.
+        if (product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             throw new NegativePriceException();
         }
 
@@ -58,7 +61,7 @@ public class ProductService {
                 )
             );
 
-        if (product.getPrice() < 0) {
+        if (product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             throw new NegativePriceException();
         }
 

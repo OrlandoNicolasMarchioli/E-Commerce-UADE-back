@@ -1,5 +1,6 @@
 package com.uade.e_commerce.repository;
 
+import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
@@ -44,7 +45,7 @@ class ProductRepositoryTest {
     private Product buildProduct(String name, Category category) {
         Product product = new Product();
         product.setName(name);
-        product.setPrice(100.0);
+        product.setPrice(new BigDecimal("100.00"));
         product.setType(ProductType.PHYSICAL);
         product.setCategory(category);
         product.setPublisher(publisher);

@@ -3,10 +3,15 @@ package com.uade.e_commerce.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 // Centralizes translating exceptions into HTTP responses, so controllers
 // don't get cluttered with try/catch and every error comes out in the same
@@ -101,11 +106,93 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    // 400 and not 409: an empty cart isn't a conflict against another
+    // operation, it's a request that can't be fulfilled as it was sent.
+    @ExceptionHandler(EmptyCartException.class)
+    public ResponseEntity<Map<String, Object>> handleEmptyCart(
+        EmptyCartException ex
+    ) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidArgument(
         IllegalArgumentException ex
     ) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    // The three handlers below cover malformed requests. Spring already
+    // turns these into a 400 on its own, but the catch-all at the bottom of
+    // this class intercepts them first and turns them into a 500, which
+    // tells the client that the server failed when what was wrong was the
+    // request. They're declared explicitly so the right status comes back.
+
+    // A parameter that can't be converted: /api/orders?userId=abc
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
+        MethodArgumentTypeMismatchException ex
+    ) {
+        return buildResponse(
+            HttpStatus.BAD_REQUEST,
+            "El parámetro '" +
+                ex.getName() +
+                "' tiene un valor inválido: " +
+                ex.getValue()
+        );
+    }
+
+    // A required parameter that never arrived: /api/orders without userId
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParameter(
+        MissingServletRequestParameterException ex
+    ) {
+        return buildResponse(
+            HttpStatus.BAD_REQUEST,
+            "Falta el parámetro obligatorio: " + ex.getParameterName()
+        );
+    }
+
+    // A body that isn't valid JSON, or that doesn't match the expected DTO.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadableBody(
+        HttpMessageNotReadableException ex
+    ) {
+        return buildResponse(
+            HttpStatus.BAD_REQUEST,
+            "El cuerpo de la petición no se pudo leer. " +
+                "Verificá que sea un JSON válido"
+        );
+    }
+
+    // =========================
+    // 405 - METHOD NOT ALLOWED
+    // =========================
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodNotSupported(
+        HttpRequestMethodNotSupportedException ex
+    ) {
+        return buildResponse(
+            HttpStatus.METHOD_NOT_ALLOWED,
+            "El método " + ex.getMethod() + " no está permitido en esta ruta"
+        );
+    }
+
+    // =========================
+    // 403 - FORBIDDEN
+    // =========================
+
+    // 403 and not 404: the order exists, what's missing is permission over
+    // it. It's answered this way because the project has no authentication
+    // yet and the message is clearer while developing; with real users it
+    // would be worth evaluating a 404 so that ids of other people's orders
+    // can't be probed.
+    @ExceptionHandler(OrderAccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderAccessDenied(
+        OrderAccessDeniedException ex
+    ) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     // =========================
@@ -124,6 +211,22 @@ public class GlobalExceptionHandler {
         DuplicateReviewException ex
     ) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    // The database rejects the operation because another record depends on
+    // the one being touched: typically deleting a product that already has
+    // orders, reviews or images. Without this handler it would fall into the
+    // catch-all and come out as a 500, as if the server had failed, when in
+    // fact the request can't be fulfilled with the data as it stands.
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(
+        DataIntegrityViolationException ex
+    ) {
+        return buildResponse(
+            HttpStatus.CONFLICT,
+            "No se puede completar la operación porque existen registros " +
+                "asociados que dependen de este recurso"
+        );
     }
 
     // =========================
