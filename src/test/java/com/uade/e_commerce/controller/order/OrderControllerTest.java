@@ -1,0 +1,295 @@
+package com.uade.e_commerce.controller.order;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.uade.e_commerce.dto.order.OrderItemResponseDTO;
+import com.uade.e_commerce.dto.order.OrderResponseDTO;
+import com.uade.e_commerce.exception.EmptyCartException;
+import com.uade.e_commerce.exception.InsufficientStockException;
+import com.uade.e_commerce.exception.InvalidOrderStateException;
+import com.uade.e_commerce.exception.OrderNotFoundException;
+import com.uade.e_commerce.service.OrderService;
+
+@WebMvcTest(OrderController.class)
+class OrderControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private OrderService orderService;
+
+    private OrderResponseDTO buildOrderResponse(
+        String status
+    ) {
+
+        OrderItemResponseDTO item =
+            new OrderItemResponseDTO(
+                20L,
+                "Cuaderno",
+                2,
+                1000.0,
+                2000.0
+            );
+
+        return new OrderResponseDTO(
+            100L,
+            1L,
+            LocalDateTime.now(),
+            status,
+            List.of(item),
+            2000.0
+        );
+    }
+
+    @Test
+    void checkout_returnsCreated() throws Exception {
+
+        when(orderService.checkout(1L))
+            .thenReturn(
+                buildOrderResponse("PENDING")
+            );
+
+        mockMvc.perform(
+            post("/api/orders?userId=1")
+        )
+            .andExpect(status().isCreated())
+            .andExpect(
+                jsonPath("$.id").value(100)
+            )
+            .andExpect(
+                jsonPath("$.userId").value(1)
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value("PENDING")
+            )
+            .andExpect(
+                jsonPath("$.items[0].productName")
+                    .value("Cuaderno")
+            )
+            .andExpect(
+                jsonPath("$.items[0].unitPrice")
+                    .value(1000.0)
+            )
+            .andExpect(
+                jsonPath("$.total").value(2000.0)
+            );
+    }
+
+    @Test
+    void checkout_emptyCart_returns400()
+        throws Exception {
+
+        when(orderService.checkout(1L))
+            .thenThrow(new EmptyCartException(1L));
+
+        mockMvc.perform(
+            post("/api/orders?userId=1")
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                jsonPath("$.status").value(400)
+            );
+    }
+
+    @Test
+    void checkout_insufficientStock_returns409()
+        throws Exception {
+
+        when(orderService.checkout(1L))
+            .thenThrow(
+                new InsufficientStockException(
+                    20L,
+                    6,
+                    5
+                )
+            );
+
+        mockMvc.perform(
+            post("/api/orders?userId=1")
+        )
+            .andExpect(status().isConflict())
+            .andExpect(
+                jsonPath("$.status").value(409)
+            );
+    }
+
+    @Test
+    void getOrdersByUser_returnsOk()
+        throws Exception {
+
+        when(orderService.getOrdersByUser(1L))
+            .thenReturn(
+                List.of(
+                    buildOrderResponse("PENDING")
+                )
+            );
+
+        mockMvc.perform(
+            get("/api/orders?userId=1")
+        )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$[0].id").value(100)
+            )
+            .andExpect(
+                jsonPath("$[0].total").value(2000.0)
+            );
+    }
+
+    @Test
+    void getOrderById_returnsOk() throws Exception {
+
+        when(orderService.getOrderById(100L))
+            .thenReturn(
+                buildOrderResponse("PAID")
+            );
+
+        mockMvc.perform(get("/api/orders/100"))
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.status").value("PAID")
+            )
+            .andExpect(
+                jsonPath("$.orderDate").exists()
+            );
+    }
+
+    @Test
+    void getOrderById_notFound_returns404()
+        throws Exception {
+
+        when(orderService.getOrderById(404L))
+            .thenThrow(
+                new OrderNotFoundException(404L)
+            );
+
+        mockMvc.perform(get("/api/orders/404"))
+            .andExpect(status().isNotFound())
+            .andExpect(
+                jsonPath("$.status").value(404)
+            );
+    }
+
+    @Test
+    void updateStatus_returnsOk() throws Exception {
+
+        when(
+            orderService.updateStatus(
+                eq(100L),
+                eq("PAID")
+            )
+        ).thenReturn(
+            buildOrderResponse("PAID")
+        );
+
+        mockMvc.perform(
+            put("/api/orders/100/status")
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
+                .content(
+                    """
+                    {
+                        "status": "PAID"
+                    }
+                    """
+                )
+        )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.status").value("PAID")
+            );
+
+        verify(orderService)
+            .updateStatus(100L, "PAID");
+    }
+
+    @Test
+    void updateStatus_invalidTransition_returns400()
+        throws Exception {
+
+        when(
+            orderService.updateStatus(
+                eq(100L),
+                eq("SHIPPED")
+            )
+        ).thenThrow(
+            new InvalidOrderStateException(
+                "PENDING",
+                "cambiar a SHIPPED"
+            )
+        );
+
+        mockMvc.perform(
+            put("/api/orders/100/status")
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
+                .content(
+                    """
+                    {
+                        "status": "SHIPPED"
+                    }
+                    """
+                )
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                jsonPath("$.status").value(400)
+            );
+    }
+
+    // An unknown value reaches the service as plain text and comes back as a
+    // 400, instead of failing during deserialization and turning into a 500.
+    @Test
+    void updateStatus_unknownValue_returns400()
+        throws Exception {
+
+        when(
+            orderService.updateStatus(
+                eq(100L),
+                eq("REGALADO")
+            )
+        ).thenThrow(
+            new InvalidOrderStateException(
+                "Estado de pedido inválido: REGALADO"
+            )
+        );
+
+        mockMvc.perform(
+            put("/api/orders/100/status")
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
+                .content(
+                    """
+                    {
+                        "status": "REGALADO"
+                    }
+                    """
+                )
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                jsonPath("$.status").value(400)
+            );
+    }
+}

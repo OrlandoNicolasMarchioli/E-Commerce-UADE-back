@@ -5,14 +5,66 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
-    { "key": "userId", "value": "", "type": "string" },
-    { "key": "userId2", "value": "", "type": "string" },
-    { "key": "categoryId", "value": "", "type": "string" },
-    { "key": "productId", "value": "", "type": "string" },
-    { "key": "imageId", "value": "", "type": "string" },
-    { "key": "reviewId", "value": "", "type": "string" },
-    { "key": "reviewId2", "value": "", "type": "string" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "imageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderCategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderProductId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    }
   ],
   "item": [
     {
@@ -35,16 +87,31 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace\",\n  \"email\": \"ada@test.com\",\n  \"password\": \"secret123\",\n  \"regNumber\": \"L1\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/register",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "auth", "register" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           },
           "response": []
@@ -66,16 +133,31 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Grace\",\n  \"lastName\": \"Hopper\",\n  \"email\": \"grace@test.com\",\n  \"password\": \"secret123\",\n  \"regNumber\": \"L2\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/register",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "auth", "register" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           },
           "response": []
@@ -95,16 +177,31 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace\",\n  \"email\": \"ada@test.com\",\n  \"password\": \"secret123\",\n  \"regNumber\": \"L1\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/register",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "auth", "register" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           },
           "response": []
@@ -124,16 +221,31 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"ada@test.com\",\n  \"password\": \"secret123\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "auth", "login" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           },
           "response": []
@@ -153,16 +265,31 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"ada@test.com\",\n  \"password\": \"contraseñaIncorrecta\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "auth", "login" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           },
           "response": []
@@ -179,8 +306,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "users" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
             }
           },
           "response": []
@@ -192,8 +324,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/{{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "users", "{{userId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
             }
           },
           "response": []
@@ -216,8 +354,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/999999",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "users", "999999" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "999999"
+              ]
             }
           },
           "response": []
@@ -226,16 +370,31 @@
           "name": "Update User",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace Update\",\n  \"email\": \"ada@test.com\",\n  \"password\": \"\",\n  \"regNumber\": \"L1\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/users/{{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "users", "{{userId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
             }
           },
           "response": []
@@ -252,8 +411,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/category",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "category" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category"
+              ]
             }
           },
           "response": []
@@ -275,16 +439,30 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Tecnologia\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/category",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "category" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category"
+              ]
             }
           },
           "response": []
@@ -296,8 +474,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/category/{{categoryId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "category", "{{categoryId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                "{{categoryId}}"
+              ]
             }
           },
           "response": []
@@ -320,8 +504,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/category/999999",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "category", "999999" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                "999999"
+              ]
             }
           },
           "response": []
@@ -330,16 +520,31 @@
           "name": "Update Category",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Tecnologia y Computacion\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/category/{{categoryId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "category", "{{categoryId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                "{{categoryId}}"
+              ]
             }
           },
           "response": []
@@ -356,8 +561,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
             }
           },
           "response": []
@@ -379,17 +589,36 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Notebook Lenovo\",\n  \"description\": \"Notebook 15 pulgadas, 16GB RAM\",\n  \"price\": 950000.0,\n  \"type\": \"PHYSICAL\",\n  \"stock\": 10,\n  \"categoryId\": {{categoryId}}\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products?publisherId={{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products" ],
-              "query": [ { "key": "publisherId", "value": "{{userId}}" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "publisherId",
+                  "value": "{{userId}}"
+                }
+              ]
             }
           },
           "response": []
@@ -409,17 +638,36 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Producto sin categoria\",\n  \"price\": 100.0,\n  \"type\": \"PHYSICAL\",\n  \"stock\": 1,\n  \"categoryId\": 999999\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products?publisherId={{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products" ],
-              "query": [ { "key": "publisherId", "value": "{{userId}}" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "publisherId",
+                  "value": "{{userId}}"
+                }
+              ]
             }
           },
           "response": []
@@ -431,8 +679,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/category/{{categoryId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "category", "{{categoryId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "category",
+                "{{categoryId}}"
+              ]
             }
           },
           "response": []
@@ -444,8 +699,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
             }
           },
           "response": []
@@ -468,8 +729,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/999999",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "999999" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999"
+              ]
             }
           },
           "response": []
@@ -478,16 +745,31 @@
           "name": "Update Product",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Notebook Lenovo (actualizado)\",\n  \"description\": \"Notebook 15 pulgadas, 16GB RAM, 512GB SSD\",\n  \"price\": 899000.0,\n  \"type\": \"PHYSICAL\",\n  \"stock\": 8,\n  \"categoryId\": {{categoryId}}\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
             }
           },
           "response": []
@@ -504,8 +786,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/images",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "images" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "images"
+              ]
             }
           },
           "response": []
@@ -527,16 +816,32 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"url\": \"https://example.com/images/notebook-1.png\",\n  \"imageOrder\": 1\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/images",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "images" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "images"
+              ]
             }
           },
           "response": []
@@ -553,8 +858,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ]
             }
           },
           "response": []
@@ -576,17 +888,38 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Excelente notebook, la recomiendo\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews?userId={{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews" ],
-              "query": [ { "key": "userId", "value": "{{userId}}" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
             }
           },
           "response": []
@@ -606,17 +939,38 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rating\": 1,\n  \"comment\": \"Segundo intento del mismo usuario, deberia fallar\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews?userId={{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews" ],
-              "query": [ { "key": "userId", "value": "{{userId}}" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
             }
           },
           "response": []
@@ -636,17 +990,38 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rating\": 5,\n  \"comment\": \"x\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/999999/reviews?userId={{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "999999", "reviews" ],
-              "query": [ { "key": "userId", "value": "{{userId}}" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
             }
           },
           "response": []
@@ -666,17 +1041,38 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rating\": 5,\n  \"comment\": \"x\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews?userId=999999",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews" ],
-              "query": [ { "key": "userId", "value": "999999" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "999999"
+                }
+              ]
             }
           },
           "response": []
@@ -698,17 +1094,38 @@
           ],
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Buena relacion precio calidad\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews?userId={{userId2}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews" ],
-              "query": [ { "key": "userId", "value": "{{userId2}}" } ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId2}}"
+                }
+              ]
             }
           },
           "response": []
@@ -720,8 +1137,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ]
             }
           },
           "response": []
@@ -733,8 +1157,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews/{{reviewId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews", "{{reviewId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           },
           "response": []
@@ -757,8 +1189,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews/999999",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews", "999999" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews",
+                "999999"
+              ]
             }
           },
           "response": []
@@ -767,16 +1207,33 @@
           "name": "Update Review",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rating\": 3,\n  \"comment\": \"Cambie de opinion despues de un mes de uso\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews/{{reviewId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews", "{{reviewId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           },
           "response": []
@@ -799,8 +1256,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews/{{reviewId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews", "{{reviewId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           },
           "response": []
@@ -823,8 +1288,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews/{{reviewId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews", "{{reviewId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           },
           "response": []
@@ -841,8 +1314,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/reviews/{{reviewId2}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "reviews", "{{reviewId2}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "reviews",
+                "{{reviewId2}}"
+              ]
             }
           },
           "response": []
@@ -854,8 +1335,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}/images/{{imageId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}", "images", "{{imageId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "images",
+                "{{imageId}}"
+              ]
             }
           },
           "response": []
@@ -867,8 +1356,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/{{productId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "products", "{{productId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
             }
           },
           "response": []
@@ -880,8 +1375,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/category/{{categoryId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "category", "{{categoryId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                "{{categoryId}}"
+              ]
             }
           },
           "response": []
@@ -893,8 +1394,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/{{userId}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "users", "{{userId}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
             }
           },
           "response": []
@@ -906,11 +1413,934 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/{{userId2}}",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "users", "{{userId2}}" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId2}}"
+              ]
             }
           },
           "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders (checkout)",
+      "description": "Flujo completo del pedido: carrito -> checkout -> estados -> cancelacion. Usa sus propios usuario, categoria y producto, y va despues del Cleanup, porque un producto que ya fue vendido no se puede borrar: los order_items lo referencian por clave foranea.",
+      "item": [
+        {
+          "name": "Setup - Register Buyer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "El flujo de pedidos usa sus propios datos porque un producto ya vendido no se puede borrar (los order_items lo referencian).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Nahuel\",\n  \"lastName\": \"Kapusta\",\n  \"email\": \"comprador@test.com\",\n  \"password\": \"secret123\",\n  \"regNumber\": \"1162678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('orderUserId', jsonData.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Setup - Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Libreria\",\n  \"description\": \"Articulos de libreria\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/category",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('orderCategoryId', jsonData.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Setup - Create Product (stock 10, $1000)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cuaderno Rivadavia\",\n  \"description\": \"Cuaderno A4 rayado\",\n  \"price\": 1000.0,\n  \"type\": \"PHYSICAL\",\n  \"stock\": 10,\n  \"categoryId\": {{orderCategoryId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products?publisherId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "publisherId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('orderProductId', jsonData.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add To Cart (2 units)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{orderProductId}},\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cart/items?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Total 2000', function () { pm.expect(jsonData.total).to.eql(2000.0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cart?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cart"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('1 item en el carrito', function () { pm.expect(jsonData.items.length).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Checkout (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "description": "No lleva body: el contenido del pedido sale del carrito del usuario.",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('orderId', jsonData.id);",
+                  "pm.test('Estado inicial PENDING', function () { pm.expect(jsonData.status).to.eql('PENDING'); });",
+                  "pm.test('Total 2000', function () { pm.expect(jsonData.total).to.eql(2000.0); });",
+                  "pm.test('Precio congelado en el item', function () { pm.expect(jsonData.items[0].unitPrice).to.eql(1000.0); });",
+                  "pm.test('Nombre copiado en el item', function () { pm.expect(jsonData.items[0].productName).to.eql('Cuaderno Rivadavia'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cart Is Empty After Checkout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "El carrito se vacia al confirmar la compra, para que el mismo pedido no se pueda generar dos veces.",
+            "url": {
+              "raw": "{{baseUrl}}/api/cart?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cart"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Carrito vaciado', function () { pm.expect(jsonData.items.length).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Stock Was Discounted (10 -> 8)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{orderProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{orderProductId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Stock descontado', function () { pm.expect(jsonData.stock).to.eql(8); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Checkout - Empty Cart (400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "description": "Un pedido sin lineas no tiene nada que cobrar.",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Orders By User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Historial con 1 pedido', function () { pm.expect(jsonData.length).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Order By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Subtotal calculado', function () { pm.expect(jsonData.items[0].subtotal).to.eql(2000.0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Order By Id - Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "999999"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Status - Skipping A Step (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Un pedido que todavia no se pago no se puede despachar.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SHIPPED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Status - Unknown Value (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Un estado inexistente es un error del cliente (400), no del servidor (500).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REGALADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Status - PENDING to PAID (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PAID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Estado PAID', function () { pm.expect(jsonData.status).to.eql('PAID'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order - PAID to CANCELLED (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Cancelar devuelve al catalogo el stock que la compra habia tomado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Estado CANCELLED', function () { pm.expect(jsonData.status).to.eql('CANCELLED'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Stock Was Restored (8 -> 10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{orderProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{orderProductId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Stock devuelto', function () { pm.expect(jsonData.stock).to.eql(10); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel Again - Already Cancelled (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "CANCELLED es un estado final: no hay transicion posible desde ahi.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add To Cart Again (2 units)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{orderProductId}},\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cart/items?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reduce Product Stock To 1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Simula que otro usuario se llevo las unidades mientras el carrito estaba cargado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cuaderno Rivadavia\",\n  \"description\": \"Cuaderno A4 rayado\",\n  \"price\": 1000.0,\n  \"type\": \"PHYSICAL\",\n  \"stock\": 1,\n  \"categoryId\": {{orderCategoryId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{orderProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{orderProductId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Checkout - Insufficient Stock (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "description": "El carrito habia validado el stock al agregar, pero el checkout lo vuelve a validar: esta es la verificacion que manda.",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cleanup - Empty Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "description": "El pedido, el producto y el usuario quedan en la base: un pedido es un registro historico y no se borra.",
+            "url": {
+              "raw": "{{baseUrl}}/api/cart?userId={{orderUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cart"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{orderUserId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     }

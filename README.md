@@ -101,16 +101,40 @@ Contiene:
 - Apellido
 - Rol
 
+### Carrito
+
+Representa la compra en curso de un usuario, antes de confirmarla. Cada usuario tiene un único carrito, que se crea la primera vez que lo consulta.
+
+Contiene:
+
+- Identificador
+- Usuario
+
+### Ítem de carrito
+
+Representa cada producto agregado al carrito, con su cantidad.
+
+Contiene:
+
+- Identificador
+- Cantidad
+- Producto
+- Carrito
+
+El carrito no guarda precios: los toma del catálogo cada vez que se consulta, así siempre muestra el valor vigente. El total tampoco se almacena, se calcula en la respuesta.
+
 ### Pedido
 
-Representa una compra realizada por un usuario.
+Representa una compra realizada por un usuario. Se genera a partir del contenido del carrito y, desde ese momento, deja de depender de él.
 
 Contiene:
 
 - Identificador
 - Fecha
 - Estado
+- Total
 - Usuario comprador
+- Ítems
 
 ### Item de pedido
 
@@ -120,10 +144,12 @@ Contiene:
 
 - Identificador
 - Cantidad
-- Precio unitario
-- Subtotal
+- Precio unitario (congelado al momento de la compra)
+- Nombre del producto (copiado al momento de la compra)
 - Producto
 - Pedido
+
+A diferencia del ítem de carrito, que toma el precio actual del catálogo, el ítem de pedido guarda su propia copia del precio y del nombre. Así, si un producto cambia de precio o se renombra, los pedidos anteriores siguen reflejando lo que el usuario efectivamente compró. El subtotal no se almacena: al ser cantidad × precio unitario, se calcula en la respuesta para que no pueda quedar desincronizado.
 
 ### Reseña
 
@@ -157,6 +183,8 @@ Las principales relaciones del modelo son:
 
 - Un **producto** pertenece a una **categoría**.
 - Una **categoría** puede contener múltiples productos.
+- Un **usuario** tiene un único **carrito**.
+- Un **carrito** puede contener múltiples ítems, uno por producto.
 - Un **usuario** puede realizar múltiples pedidos.
 - Un **pedido** pertenece a un usuario.
 - Un **pedido** puede contener múltiples ítems.
@@ -165,6 +193,63 @@ Las principales relaciones del modelo son:
 - Un **producto** puede recibir múltiples reseñas.
 - Un **usuario** puede escribir múltiples reseñas.
 - Cada reseña pertenece a un producto y a un usuario.
+
+---
+
+## 🧾 Del carrito al pedido (checkout)
+
+El checkout es la operación que convierte un carrito en un pedido. Se ejecuta como una única transacción: si algún paso falla, no se guarda nada.
+
+Al confirmar la compra, el sistema:
+
+1. Verifica que el carrito exista y tenga al menos un ítem.
+2. Valida el stock de **todos** los ítems antes de modificar ninguno, para que un producto sin stock al final del carrito no deje a los anteriores ya descontados.
+3. Crea el pedido en estado `PENDING`, copiando en cada ítem el nombre y el precio del producto.
+4. Descuenta el stock de los productos físicos.
+5. Calcula el total y guarda el pedido junto con sus ítems.
+6. Vacía el carrito, para que la misma compra no pueda generarse dos veces.
+
+El stock se valida nuevamente en este punto, aunque el carrito ya lo haya hecho al agregar el ítem: entre ambos momentos puede haber pasado tiempo y otro usuario puede haberse llevado esas unidades.
+
+Los productos de tipo `SERVICE` (clases, cursos) no manejan stock, por lo que no se validan ni se descuentan.
+
+### Estados del pedido
+
+```text
+PENDING ──▶ PAID ──▶ SHIPPED ──▶ DELIVERED
+   │         │
+   └────┬────┘
+        ▼
+    CANCELLED
+```
+
+- Un pedido nace en `PENDING` y solo puede avanzar a lo largo del flujo.
+- `DELIVERED` y `CANCELLED` son estados finales: no admiten cambios posteriores.
+- Un pedido puede cancelarse mientras no haya sido despachado. Al cancelarse, el stock reservado vuelve al catálogo.
+- Una vez en `SHIPPED`, la mercadería ya salió y la cancelación deja de ser posible.
+
+Las transiciones válidas están definidas en el propio enum `OrderStatus`, de modo que exista un único lugar donde consultarlas o modificarlas.
+
+### Endpoints
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `POST` | `/api/orders?userId={id}` | Genera el pedido a partir del carrito del usuario. No lleva body |
+| `GET` | `/api/orders?userId={id}` | Historial de pedidos del usuario, del más reciente al más antiguo |
+| `GET` | `/api/orders/{id}` | Detalle de un pedido con sus ítems |
+| `PUT` | `/api/orders/{id}/status` | Cambia el estado del pedido. Body: `{ "status": "PAID" }` |
+
+La cancelación no tiene un endpoint propio: es un cambio de estado más y se realiza mediante `PUT /api/orders/{id}/status` con `CANCELLED`, para que las reglas de transición se apliquen en un solo lugar.
+
+### Respuestas de error
+
+| Código | Situación |
+|---|---|
+| `400` | Carrito vacío, estado inexistente o transición no permitida |
+| `404` | Pedido o usuario inexistente |
+| `409` | Stock insuficiente al confirmar la compra |
+
+Un pedido no se elimina: es un registro histórico de una operación. Por eso no existe un `DELETE` de pedidos, y un producto que ya fue vendido no puede borrarse, ya que sus ítems de pedido lo referencian.
 
 ---
 
