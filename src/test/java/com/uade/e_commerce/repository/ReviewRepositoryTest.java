@@ -18,6 +18,7 @@ import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
 import com.uade.e_commerce.model.Review;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -43,9 +44,9 @@ class ReviewRepositoryTest {
     void setUp() {
         Category category = categoryRepository.save(new Category(null, "Tecnología", null));
         User publisher = userRepository.save(
-                new User(null, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true));
+                new User(null, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true, Role.USER));
         reviewer = userRepository.save(
-                new User(null, "Grace", "Hopper", "grace@test.com", "hash", "L2", LocalDateTime.now(), true));
+                new User(null, "Grace", "Hopper", "grace@test.com", "hash", "L2", LocalDateTime.now(), true, Role.USER));
 
         product = new Product();
         product.setName("Notebook");
@@ -73,7 +74,7 @@ class ReviewRepositoryTest {
         reviewRepository.save(older);
 
         User anotherReviewer = userRepository.save(
-                new User(null, "Linus", "Torvalds", "linus@test.com", "hash", "L3", LocalDateTime.now(), true));
+                new User(null, "Linus", "Torvalds", "linus@test.com", "hash", "L3", LocalDateTime.now(), true, Role.USER));
         Review newer = buildReview(anotherReviewer);
         newer.setDate(LocalDateTime.now());
         reviewRepository.save(newer);

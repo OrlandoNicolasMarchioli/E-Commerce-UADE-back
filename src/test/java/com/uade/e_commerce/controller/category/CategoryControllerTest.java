@@ -17,11 +17,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.uade.e_commerce.exception.CategoryNotFoundException;
 import com.uade.e_commerce.model.Category;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.CategoryService;
 
 @WebMvcTest(CategoryController.class)
@@ -32,6 +35,12 @@ class CategoryControllerTest {
 
     @MockitoBean
     private CategoryService categoryService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Test
     void getAllCategories_returnsList() throws Exception {
@@ -62,6 +71,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createCategory_returnsCreatedCategory() throws Exception {
         when(categoryService.createCategory(any(Category.class))).thenReturn(new Category(1L, "Cursos", null));
 
@@ -73,6 +83,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateCategory_found_returnsOk() throws Exception {
         when(categoryService.updateCategory(eq(1L), any(Category.class)))
                 .thenReturn(new Category(1L, "Nuevo nombre", null));
@@ -85,6 +96,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateCategory_notFound_returns404() throws Exception {
         when(categoryService.updateCategory(eq(99L), any(Category.class)))
                 .thenThrow(new CategoryNotFoundException(99L));
@@ -96,6 +108,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteCategory_found_returnsNoContent() throws Exception {
         when(categoryService.deleteCategory(1L)).thenReturn(true);
 
@@ -104,6 +117,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteCategory_notFound_returns404() throws Exception {
         when(categoryService.deleteCategory(99L)).thenThrow(new CategoryNotFoundException(99L));
 

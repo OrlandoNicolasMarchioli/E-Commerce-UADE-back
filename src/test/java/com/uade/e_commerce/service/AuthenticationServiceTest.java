@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
 import com.uade.e_commerce.exception.InvalidCredentialsException;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.UserRepository;
 
@@ -40,12 +41,12 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
-        enabledUser = new User(1L, "Ada", "Lovelace", "ada@test.com", "encodedHash", "L1", LocalDateTime.now(), true);
+        enabledUser = new User(1L, "Ada", "Lovelace", "ada@test.com", "encodedHash", "L1", LocalDateTime.now(), true, Role.USER);
     }
 
     @Test
     void register_emailNotTaken_encodesPasswordAndSaves() {
-        User toRegister = new User(null, "Ada", "Lovelace", "ada@test.com", "rawPassword", "L1", null, true);
+        User toRegister = new User(null, "Ada", "Lovelace", "ada@test.com", "rawPassword", "L1", null, true, Role.USER);
         when(userRepository.existsByEmail("ada@test.com")).thenReturn(false);
         when(passwordEncoder.encode("rawPassword")).thenReturn("encodedHash");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -57,7 +58,7 @@ class AuthenticationServiceTest {
 
     @Test
     void register_emailAlreadyTaken_throwsAndDoesNotSave() {
-        User toRegister = new User(null, "Ada", "Lovelace", "ada@test.com", "rawPassword", "L1", null, true);
+        User toRegister = new User(null, "Ada", "Lovelace", "ada@test.com", "rawPassword", "L1", null, true, Role.USER);
         when(userRepository.existsByEmail("ada@test.com")).thenReturn(true);
 
         assertThatThrownBy(() -> authenticationService.register(toRegister))
