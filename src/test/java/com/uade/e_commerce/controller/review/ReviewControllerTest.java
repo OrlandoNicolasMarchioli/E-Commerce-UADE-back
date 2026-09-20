@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,6 +27,7 @@ import com.uade.e_commerce.exception.ReviewNotFoundException;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.Review;
 import com.uade.e_commerce.model.User;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.ReviewService;
 
 @WebMvcTest(ReviewController.class)
@@ -35,6 +38,12 @@ class ReviewControllerTest {
 
     @MockitoBean
     private ReviewService reviewService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     private Review buildReview() {
         Product product = new Product();
@@ -80,6 +89,7 @@ class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser
     void createReview_valid_returnsCreated() throws Exception {
         when(reviewService.createReview(eq(1L), eq(2L), any())).thenReturn(buildReview());
 
@@ -91,6 +101,7 @@ class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser
     void createReview_duplicate_returns409() throws Exception {
         when(reviewService.createReview(eq(1L), eq(2L), any()))
                 .thenThrow(new DuplicateReviewException(2L, 1L));
@@ -102,6 +113,7 @@ class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateReview_found_returnsOk() throws Exception {
         when(reviewService.updateReview(eq(1L), eq(10L), any())).thenReturn(buildReview());
 
@@ -112,6 +124,7 @@ class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateReview_notFound_returns404() throws Exception {
         when(reviewService.updateReview(eq(1L), eq(99L), any())).thenThrow(new ReviewNotFoundException(99L));
 
@@ -122,12 +135,14 @@ class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser
     void deleteReview_found_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/api/products/1/reviews/10"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @WithMockUser
     void deleteReview_notFound_returns404() throws Exception {
         org.mockito.Mockito.doThrow(new ReviewNotFoundException(99L))
                 .when(reviewService).deleteReview(1L, 99L);

@@ -23,6 +23,7 @@ import com.uade.e_commerce.exception.ProductNotFoundException;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.ProductRepository;
 
@@ -44,7 +45,7 @@ class ProductServiceTest {
         product.setType(ProductType.PHYSICAL);
         product.setStock(10);
         Category category = new Category(1L, "Cursos", null);
-        User publisher = new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", null, true);
+        User publisher = new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", null, true, Role.USER);
         product.setCategory(category);
         product.setPublisher(publisher);
         return product;

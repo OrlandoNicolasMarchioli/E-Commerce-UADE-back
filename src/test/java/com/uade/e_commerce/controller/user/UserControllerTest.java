@@ -17,11 +17,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.uade.e_commerce.exception.UserNotFoundException;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.UserService;
 
 @WebMvcTest(UserController.class)
@@ -33,11 +37,18 @@ class UserControllerTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
     private User buildUser() {
-        return new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true);
+        return new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true, Role.USER);
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getAllUsers_returnsList() throws Exception {
         when(userService.getAllUsers()).thenReturn(List.of(buildUser()));
 
@@ -48,6 +59,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getUserById_found_returnsOk() throws Exception {
         when(userService.getUserById(1L)).thenReturn(buildUser());
 
@@ -57,6 +69,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getUserById_notFound_returns404() throws Exception {
         when(userService.getUserById(99L)).thenThrow(new UserNotFoundException(99L));
 
@@ -65,6 +78,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateUser_found_returnsOk() throws Exception {
         when(userService.updateUser(eq(1L), any(User.class))).thenReturn(buildUser());
 
@@ -76,6 +90,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateUser_notFound_returns404() throws Exception {
         when(userService.updateUser(eq(99L), any(User.class))).thenThrow(new UserNotFoundException(99L));
 
@@ -86,6 +101,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void deleteUser_found_returnsNoContent() throws Exception {
         when(userService.deleteUser(1L)).thenReturn(true);
 
@@ -94,6 +110,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void deleteUser_notFound_returns404() throws Exception {
         when(userService.deleteUser(99L)).thenThrow(new UserNotFoundException(99L));
 

@@ -16,6 +16,7 @@ import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductImage;
 import com.uade.e_commerce.model.ProductType;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -40,7 +41,7 @@ class ProductImageRepositoryTest {
     void setUp() {
         Category category = categoryRepository.save(new Category(null, "Tecnología", null));
         User publisher = userRepository.save(
-                new User(null, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true));
+                new User(null, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true, Role.USER));
 
         product = new Product();
         product.setName("Notebook");

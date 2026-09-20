@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,6 +28,7 @@ import com.uade.e_commerce.exception.InsufficientStockException;
 import com.uade.e_commerce.exception.InvalidOrderStateException;
 import com.uade.e_commerce.exception.OrderAccessDeniedException;
 import com.uade.e_commerce.exception.OrderNotFoundException;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.OrderService;
 
 @WebMvcTest(OrderController.class)
@@ -36,6 +39,12 @@ class OrderControllerTest {
 
     @MockitoBean
     private OrderService orderService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     private OrderResponseDTO buildOrderResponse(
         String status
@@ -61,6 +70,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void checkout_returnsCreated() throws Exception {
 
         when(orderService.checkout(1L))
@@ -96,6 +106,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void checkout_emptyCart_returns400()
         throws Exception {
 
@@ -112,6 +123,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void checkout_insufficientStock_returns409()
         throws Exception {
 
@@ -134,6 +146,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getOrdersByUser_returnsOk()
         throws Exception {
 
@@ -157,6 +170,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getOrderById_returnsOk() throws Exception {
 
         when(orderService.getOrderById(100L, 1L))
@@ -175,6 +189,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getOrderById_notFound_returns404()
         throws Exception {
 
@@ -190,9 +205,8 @@ class OrderControllerTest {
             );
     }
 
-    // Knowing the id isn't enough: the order has to belong to the user
-    // asking for it.
     @Test
+    @WithMockUser
     void getOrderById_otherUsersOrder_returns403()
         throws Exception {
 
@@ -214,6 +228,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateStatus_otherUsersOrder_returns403()
         throws Exception {
 
@@ -247,6 +262,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateStatus_returnsOk() throws Exception {
 
         when(
@@ -282,6 +298,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateStatus_invalidTransition_returns400()
         throws Exception {
 
@@ -317,9 +334,8 @@ class OrderControllerTest {
             );
     }
 
-    // An unknown value reaches the service as plain text and comes back as a
-    // 400, instead of failing during deserialization and turning into a 500.
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateStatus_unknownValue_returns400()
         throws Exception {
 
