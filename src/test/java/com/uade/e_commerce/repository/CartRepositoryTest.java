@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.uade.e_commerce.model.Cart;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(
@@ -39,7 +40,8 @@ class CartRepositoryTest {
                 "hash",
                 "1202784",
                 LocalDateTime.now(),
-                true
+                true,
+                Role.USER
             )
         );
     }

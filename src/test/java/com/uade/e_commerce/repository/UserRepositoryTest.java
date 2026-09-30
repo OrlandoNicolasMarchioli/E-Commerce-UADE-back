@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -21,7 +22,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     private User persistUser(String email) {
-        return userRepository.save(new User(null, "Ada", "Lovelace", email, "hash", "L1", LocalDateTime.now(), true));
+        return userRepository.save(new User(null, "Ada", "Lovelace", email, "hash", "L1", LocalDateTime.now(), true, Role.USER));
     }
 
     @Test

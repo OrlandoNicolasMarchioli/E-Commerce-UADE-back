@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
 import com.uade.e_commerce.exception.UserNotFoundException;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.UserRepository;
 
@@ -38,7 +39,7 @@ class UserServiceTest {
     private UserService userService;
 
     private User buildUser(Long id, String email, String password) {
-        return new User(id, "Ada", "Lovelace", email, password, "L1", LocalDateTime.now(), true);
+        return new User(id, "Ada", "Lovelace", email, password, "L1", LocalDateTime.now(), true, Role.USER);
     }
 
     @Test

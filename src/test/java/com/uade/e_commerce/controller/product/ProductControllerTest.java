@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,7 +29,9 @@ import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.CategoryService;
 import com.uade.e_commerce.service.ProductService;
 import com.uade.e_commerce.service.UserService;
@@ -47,6 +51,12 @@ class ProductControllerTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
     private Product buildProduct() {
         Product product = new Product();
         product.setId(1L);
@@ -56,7 +66,7 @@ class ProductControllerTest {
         product.setType(ProductType.PHYSICAL);
         product.setStock(5);
         product.setCategory(new Category(1L, "Tecnología", null));
-        product.setPublisher(new User(2L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", null, true));
+        product.setPublisher(new User(2L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", null, true, Role.USER));
         return product;
     }
 
@@ -98,9 +108,10 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createProduct_categoryAndPublisherExist_returnsOk() throws Exception {
         when(categoryService.getCategoryById(1L)).thenReturn(new Category(1L, "Tecnología", null));
-        when(userService.getUserById(2L)).thenReturn(new User(2L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", null, true));
+        when(userService.getUserById(2L)).thenReturn(new User(2L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", null, true, Role.USER));
         when(productService.createProduct(any(Product.class))).thenReturn(buildProduct());
 
         mockMvc.perform(post("/api/products?publisherId=2")
@@ -111,6 +122,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createProduct_categoryDoesNotExist_returns404() throws Exception {
         when(categoryService.getCategoryById(99L)).thenThrow(new CategoryNotFoundException(99L));
 
@@ -121,6 +133,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createProduct_publisherDoesNotExist_returns404() throws Exception {
         when(categoryService.getCategoryById(1L)).thenReturn(new Category(1L, "Tecnología", null));
         when(userService.getUserById(99L)).thenThrow(new UserNotFoundException(99L));
@@ -132,6 +145,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateProduct_categoryExists_returnsOk() throws Exception {
         when(categoryService.getCategoryById(1L)).thenReturn(new Category(1L, "Tecnología", null));
         when(productService.updateProduct(eq(1L), any(Product.class))).thenReturn(buildProduct());
@@ -143,6 +157,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateProduct_categoryDoesNotExist_returns404() throws Exception {
         when(categoryService.getCategoryById(99L)).thenThrow(new CategoryNotFoundException(99L));
 
@@ -153,6 +168,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateProduct_productNotFound_returns404() throws Exception {
         when(categoryService.getCategoryById(1L)).thenReturn(new Category(1L, "Tecnología", null));
         when(productService.updateProduct(eq(99L), any(Product.class))).thenThrow(new ProductNotFoundException(99L));
@@ -164,6 +180,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteProduct_found_returnsNoContent() throws Exception {
         when(productService.deleteProduct(1L)).thenReturn(true);
 
@@ -172,6 +189,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteProduct_notFound_returns404() throws Exception {
         when(productService.deleteProduct(99L)).thenThrow(new ProductNotFoundException(99L));
 
