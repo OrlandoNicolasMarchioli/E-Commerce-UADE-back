@@ -19,10 +19,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(
-    name = "cart_items",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"cart_id", "product_id"})
-    }
+        name = "cart_items",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = {"cart_id", "product_id"})
+        }
 )
 public class CartItem {
 
@@ -34,8 +34,7 @@ public class CartItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    // Every item belongs to one cart. LAZY avoids loading the cart unless
-    // the relationship is actually accessed.
+    // Every item belongs to one cart. 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;

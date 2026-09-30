@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductImage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,7 +33,4 @@ public class ProductImage {
     @ManyToOne(fetch = FetchType.LAZY) // Lazy loading so the image isn't loaded until it's needed
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-
-
-    
 }

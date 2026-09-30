@@ -11,10 +11,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * A product's category (e.g. "Supplies", "Courses", "Private lessons").
- * A product belongs to a single category (1-to-many relationship).
+ * A product's category (e.g. "Supplies", "Courses", "Private lessons"). A
+ * product belongs to a single category (1-to-many relationship).
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -26,10 +26,9 @@ import lombok.ToString;
 
 /**
  * An order placed by a user. It's built from the contents of the cart at
- * checkout time and, from that point on, it stops depending on the cart:
- * it keeps its own copy of what was bought and at what price.
+ * checkout time and, from that point on, it stops depending on the cart: it
+ * keeps its own copy of what was bought and at what price.
  */
-
 // The table is called "orders" and not "order" because ORDER is a reserved
 // SQL word (ORDER BY); Hibernate would fail to create the table.
 @Data
@@ -73,10 +72,10 @@ public class Order {
     // @OrderBy keeps the lines always in the same order, so the response of
     // an order doesn't change between calls.
     @OneToMany(
-        mappedBy = "order",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY
+            mappedBy = "order",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
     )
     @OrderBy("id ASC")
     @ToString.Exclude
