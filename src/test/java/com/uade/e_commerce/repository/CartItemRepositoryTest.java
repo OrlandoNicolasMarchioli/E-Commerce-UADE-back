@@ -16,6 +16,7 @@ import com.uade.e_commerce.model.CartItem;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(
@@ -64,7 +65,8 @@ class CartItemRepositoryTest {
                     "hash",
                     "1202784",
                     LocalDateTime.now(),
-                    true
+                    true,
+                    Role.USER
                 )
             );
 

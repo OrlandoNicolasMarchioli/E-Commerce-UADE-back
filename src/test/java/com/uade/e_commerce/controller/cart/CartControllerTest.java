@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -23,6 +25,7 @@ import com.uade.e_commerce.dto.cart.CartItemResponseDTO;
 import com.uade.e_commerce.dto.cart.CartResponseDTO;
 import com.uade.e_commerce.exception.InsufficientStockException;
 import com.uade.e_commerce.exception.InvalidQuantityException;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.CartService;
 
 @WebMvcTest(CartController.class)
@@ -33,6 +36,12 @@ class CartControllerTest {
 
     @MockitoBean
     private CartService cartService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     private CartResponseDTO buildCartResponse() {
 
@@ -54,6 +63,7 @@ class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getCart_returnsOk() throws Exception {
 
         when(cartService.getCart(1L))
@@ -84,6 +94,7 @@ class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void addItem_valid_returnsCreated()
         throws Exception {
 
@@ -117,6 +128,7 @@ class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void addItem_insufficientStock_returns409()
         throws Exception {
 
@@ -151,6 +163,7 @@ class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void addItem_invalidQuantity_returns400()
         throws Exception {
 
@@ -183,6 +196,7 @@ class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void removeItem_returnsNoContent()
         throws Exception {
 
@@ -200,6 +214,7 @@ class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void clearCart_returnsNoContent()
         throws Exception {
 

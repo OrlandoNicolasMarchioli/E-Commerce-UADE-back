@@ -18,6 +18,7 @@ import com.uade.e_commerce.model.OrderItem;
 import com.uade.e_commerce.model.OrderStatus;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(
@@ -57,7 +58,8 @@ class OrderRepositoryTest {
                 "hash",
                 "1225238",
                 LocalDateTime.now(),
-                true
+                true,
+                Role.USER
             )
         );
 

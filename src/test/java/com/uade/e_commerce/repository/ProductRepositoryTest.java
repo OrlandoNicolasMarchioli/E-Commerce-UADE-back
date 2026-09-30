@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
 import com.uade.e_commerce.model.ProductType;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -39,7 +40,7 @@ class ProductRepositoryTest {
         tech = categoryRepository.save(new Category(null, "Tecnología", null));
         books = categoryRepository.save(new Category(null, "Libros", null));
         publisher = userRepository.save(
-                new User(null, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true));
+                new User(null, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true, Role.USER));
     }
 
     private Product buildProduct(String name, Category category) {

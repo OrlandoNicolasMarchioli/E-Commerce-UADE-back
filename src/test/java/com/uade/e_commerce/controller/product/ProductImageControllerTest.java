@@ -16,10 +16,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.uade.e_commerce.dto.product.ProductImageResponseDTO;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.ProductImageService;
 
 @WebMvcTest(ProductImageController.class)
@@ -30,6 +33,12 @@ class ProductImageControllerTest {
 
     @MockitoBean
     private ProductImageService productImageService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     private ProductImageResponseDTO buildResponse() {
         ProductImageResponseDTO dto = new ProductImageResponseDTO();
@@ -51,6 +60,7 @@ class ProductImageControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void addImageToProduct_returnsCreated() throws Exception {
         when(productImageService.addImageToProduct(eq(1L), any())).thenReturn(buildResponse());
 
@@ -62,6 +72,7 @@ class ProductImageControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteProductImage_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/api/products/1/images/1"))
                 .andExpect(status().isNoContent());

@@ -6,42 +6,40 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.uade.e_commerce.dto.user.AuthResponseDTO;
 import com.uade.e_commerce.dto.user.LoginRequestDTO;
 import com.uade.e_commerce.dto.user.RegisterRequestDTO;
 import com.uade.e_commerce.dto.user.UserResponseDTO;
 import com.uade.e_commerce.model.User;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.AuthenticationService;
 
 // http://localhost:8080/api/auth
-//
-// User sign-up lives here and not in /api/users because registering is
-// part of authentication. What's left in /api/users is the administrative
-// CRUD.
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final JwtService jwtService;
 
-    AuthenticationController(AuthenticationService authenticationService) {
+    AuthenticationController(AuthenticationService authenticationService, JwtService jwtService) {
         this.authenticationService = authenticationService;
+        this.jwtService = jwtService;
     }
 
-    // post http://localhost:8080/api/auth/register
+    // POST http://localhost:8080/api/auth/register
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
-        User registeredUser = authenticationService.register(registerRequestDTO.toEntity());
-        return ResponseEntity.ok(UserResponseDTO.fromEntity(registeredUser));
+    public ResponseEntity<AuthResponseDTO> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
+        User user = authenticationService.register(registerRequestDTO.toEntity());
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponseDTO(token, UserResponseDTO.fromEntity(user)));
     }
 
-    // post http://localhost:8080/api/auth/login
-    // If the credentials aren't valid, the service throws
-    // InvalidCredentialsException and the GlobalExceptionHandler turns it
-    // into a 401. That's why there's no if here: if we reach the next
-    // line, the user is valid.
+    // POST http://localhost:8080/api/auth/login
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
         User user = authenticationService.authenticate(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
-        return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponseDTO(token, UserResponseDTO.fromEntity(user)));
     }
 }

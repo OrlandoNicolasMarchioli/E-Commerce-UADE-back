@@ -12,12 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
 import com.uade.e_commerce.exception.InvalidCredentialsException;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
+import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.AuthenticationService;
 
 @WebMvcTest(AuthenticationController.class)
@@ -29,19 +32,27 @@ class AuthenticationControllerTest {
     @MockitoBean
     private AuthenticationService authenticationService;
 
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
     private User buildUser() {
-        return new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true);
+        return new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true, Role.USER);
     }
 
     @Test
     void register_validData_returnsOk() throws Exception {
         when(authenticationService.register(any(User.class))).thenReturn(buildUser());
+        when(jwtService.generateToken(any())).thenReturn("test-token");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"firstName\":\"Ada\",\"lastName\":\"Lovelace\",\"email\":\"ada@test.com\",\"password\":\"secret\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("ada@test.com"));
+                .andExpect(jsonPath("$.token").value("test-token"))
+                .andExpect(jsonPath("$.user.email").value("ada@test.com"));
     }
 
     @Test
@@ -59,12 +70,14 @@ class AuthenticationControllerTest {
     @Test
     void login_validCredentials_returnsOk() throws Exception {
         when(authenticationService.authenticate("ada@test.com", "secret")).thenReturn(buildUser());
+        when(jwtService.generateToken(any())).thenReturn("test-token");
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"ada@test.com\",\"password\":\"secret\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("ada@test.com"));
+                .andExpect(jsonPath("$.token").value("test-token"))
+                .andExpect(jsonPath("$.user.email").value("ada@test.com"));
     }
 
     @Test
