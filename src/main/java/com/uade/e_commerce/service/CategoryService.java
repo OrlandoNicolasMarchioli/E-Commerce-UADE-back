@@ -26,12 +26,12 @@ public class CategoryService {
 
     public Category getCategoryById(Long id) {
         return categoryRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new CategoryNotFoundException(
-                    "Categoría no encontrada con id: " + id
+                .findById(id)
+                .orElseThrow(()
+                        -> new CategoryNotFoundException(
+                        "Categoría no encontrada con id: " + id
                 )
-            );
+                );
     }
 
     public Category createCategory(Category category) {
@@ -40,12 +40,12 @@ public class CategoryService {
 
     public Category updateCategory(Long id, Category category) {
         Category existing = categoryRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new CategoryNotFoundException(
-                    "Categoría no encontrada con id: " + id
+                .findById(id)
+                .orElseThrow(()
+                        -> new CategoryNotFoundException(
+                        "Categoría no encontrada con id: " + id
                 )
-            );
+                );
 
         existing.setName(category.getName());
         return categoryRepository.save(existing);
@@ -54,7 +54,7 @@ public class CategoryService {
     public boolean deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new CategoryNotFoundException(
-                "Categoría no encontrada con id: " + id
+                    "Categoría no encontrada con id: " + id
             );
         }
         categoryRepository.deleteById(id);

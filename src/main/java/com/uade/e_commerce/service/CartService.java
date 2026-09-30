@@ -35,10 +35,10 @@ public class CartService {
     private final UserRepository userRepository;
 
     public CartService(
-        CartRepository cartRepository,
-        CartItemRepository cartItemRepository,
-        ProductRepository productRepository,
-        UserRepository userRepository
+            CartRepository cartRepository,
+            CartItemRepository cartItemRepository,
+            ProductRepository productRepository,
+            UserRepository userRepository
     ) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
@@ -53,15 +53,15 @@ public class CartService {
         User user = getUser(userId);
 
         Cart cart = cartRepository
-            .findByUserId(userId)
-            .orElseGet(() -> createCart(user));
+                .findByUserId(userId)
+                .orElseGet(() -> createCart(user));
 
         return buildResponse(cart);
     }
 
     public CartResponseDTO addItem(
-        Long userId,
-        CartItemRequestDTO dto
+            Long userId,
+            CartItemRequestDTO dto
     ) {
 
         if (dto.getQuantity() == null || dto.getQuantity() <= 0) {
@@ -71,50 +71,50 @@ public class CartService {
         User user = getUser(userId);
 
         Product product = productRepository
-            .findById(dto.getProductId())
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " +
-                    dto.getProductId()
+                .findById(dto.getProductId())
+                .orElseThrow(()
+                        -> new ProductNotFoundException(
+                        "Producto no encontrado con id: "
+                        + dto.getProductId()
                 )
-            );
+                );
 
         Cart cart = cartRepository
-            .findByUserId(userId)
-            .orElseGet(() -> createCart(user));
+                .findByUserId(userId)
+                .orElseGet(() -> createCart(user));
 
         // There can only be one row per product and cart. If the product is
         // already present, the requested quantity is added to the existing one.
         CartItem existingItem = cartItemRepository
-            .findByCartIdAndProductId(
-                cart.getId(),
-                product.getId()
-            )
-            .orElse(null);
+                .findByCartIdAndProductId(
+                        cart.getId(),
+                        product.getId()
+                )
+                .orElse(null);
 
-        int currentQuantity =
-            existingItem == null
-                ? 0
-                : existingItem.getQuantity();
+        int currentQuantity
+                = existingItem == null
+                        ? 0
+                        : existingItem.getQuantity();
 
-        int requestedTotal =
-            currentQuantity + dto.getQuantity();
+        int requestedTotal
+                = currentQuantity + dto.getQuantity();
 
         // Services don't manage stock. For physical products we validate the
         // final quantity in the cart, not only the amount being added.
         if (product.getType() == ProductType.PHYSICAL) {
 
-            int availableStock =
-                product.getStock() == null
+            int availableStock
+                    = product.getStock() == null
                     ? 0
                     : product.getStock();
 
             if (requestedTotal > availableStock) {
 
                 throw new InsufficientStockException(
-                    product.getId(),
-                    requestedTotal,
-                    availableStock
+                        product.getId(),
+                        requestedTotal,
+                        availableStock
                 );
             }
         }
@@ -142,15 +142,15 @@ public class CartService {
     }
 
     public void removeItem(
-        Long userId,
-        Long productId
+            Long userId,
+            Long productId
     ) {
 
         getUser(userId);
 
         Cart cart = cartRepository
-            .findByUserId(userId)
-            .orElse(null);
+                .findByUserId(userId)
+                .orElse(null);
 
         // Removing from a cart that doesn't exist is treated as an idempotent
         // operation: there is simply nothing to remove.
@@ -159,11 +159,11 @@ public class CartService {
         }
 
         cartItemRepository
-            .findByCartIdAndProductId(
-                cart.getId(),
-                productId
-            )
-            .ifPresent(cartItemRepository::delete);
+                .findByCartIdAndProductId(
+                        cart.getId(),
+                        productId
+                )
+                .ifPresent(cartItemRepository::delete);
     }
 
     public void clearCart(Long userId) {
@@ -171,8 +171,8 @@ public class CartService {
         getUser(userId);
 
         Cart cart = cartRepository
-            .findByUserId(userId)
-            .orElse(null);
+                .findByUserId(userId)
+                .orElse(null);
 
         // Clearing a cart that doesn't exist already satisfies the requested
         // final state, so no error is returned.
@@ -181,17 +181,17 @@ public class CartService {
         }
 
         cartItemRepository.deleteByCartId(
-            cart.getId()
+                cart.getId()
         );
     }
 
     private User getUser(Long userId) {
 
         return userRepository
-            .findById(userId)
-            .orElseThrow(() ->
-                new UserNotFoundException(userId)
-            );
+                .findById(userId)
+                .orElseThrow(()
+                        -> new UserNotFoundException(userId)
+                );
     }
 
     private Cart createCart(User user) {
@@ -205,17 +205,17 @@ public class CartService {
 
     private CartResponseDTO buildResponse(Cart cart) {
 
-        List<CartItem> cartItems =
-            cartItemRepository
-                .findByCartIdOrderByIdAsc(
-                    cart.getId()
-                );
+        List<CartItem> cartItems
+                = cartItemRepository
+                        .findByCartIdOrderByIdAsc(
+                                cart.getId()
+                        );
 
-        List<CartItemResponseDTO> items =
-            cartItems
-                .stream()
-                .map(CartItemResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        List<CartItemResponseDTO> items
+                = cartItems
+                        .stream()
+                        .map(CartItemResponseDTO::fromEntity)
+                        .collect(Collectors.toList());
 
         // The total is calculated at response time using current product prices,
         // so the cart always reflects the latest catalog value.
@@ -223,20 +223,20 @@ public class CartService {
         // With BigDecimal the sum goes through reduce(): there's no
         // mapToDouble equivalent, and going through double would bring back
         // exactly the rounding errors this type avoids.
-        BigDecimal total =
-            items
-                .stream()
-                .map(CartItemResponseDTO::getSubtotal)
-                .reduce(
-                    BigDecimal.ZERO,
-                    BigDecimal::add
-                );
+        BigDecimal total
+                = items
+                        .stream()
+                        .map(CartItemResponseDTO::getSubtotal)
+                        .reduce(
+                                BigDecimal.ZERO,
+                                BigDecimal::add
+                        );
 
         return new CartResponseDTO(
-            cart.getId(),
-            cart.getUser().getId(),
-            items,
-            total
+                cart.getId(),
+                cart.getUser().getId(),
+                items,
+                total
         );
     }
 }
