@@ -30,18 +30,18 @@ public class UserService {
 
     public User getUserById(Long id) {
         return userRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new UserNotFoundException("Usuario no encontrado con id: " + id)
-            );
+                .findById(id)
+                .orElseThrow(()
+                        -> new UserNotFoundException("Usuario no encontrado con id: " + id)
+                );
     }
 
     public User updateUser(Long id, User user) {
         User existingUser = userRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new UserNotFoundException("Usuario no encontrado con id: " + id)
-            );
+                .findById(id)
+                .orElseThrow(()
+                        -> new UserNotFoundException("Usuario no encontrado con id: " + id)
+                );
 
         // We compare against the current email so we don't reject an update
         // that sends the same email as always, which is normal when only
@@ -71,7 +71,7 @@ public class UserService {
     public boolean deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException(
-                "Usuario no encontrado con id: " + id
+                    "Usuario no encontrado con id: " + id
             );
         }
         userRepository.deleteById(id);

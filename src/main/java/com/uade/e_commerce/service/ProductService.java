@@ -28,18 +28,18 @@ public class ProductService {
     }
 
     public List<Product> getProductsByCategory(Long categoryId) {
-    return productRepository.findByCategoryId(categoryId);
+        return productRepository.findByCategoryId(categoryId);
 
     }
 
     public Product getProductById(Long id) {
         return productRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " + id
+                .findById(id)
+                .orElseThrow(()
+                        -> new ProductNotFoundException(
+                        "Producto no encontrado con id: " + id
                 )
-            );
+                );
     }
 
     public Product createProduct(Product product) {
@@ -54,12 +54,12 @@ public class ProductService {
 
     public Product updateProduct(Long id, Product product) {
         Product existing = productRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " + id
+                .findById(id)
+                .orElseThrow(()
+                        -> new ProductNotFoundException(
+                        "Producto no encontrado con id: " + id
                 )
-            );
+                );
 
         if (product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             throw new NegativePriceException();
@@ -79,13 +79,13 @@ public class ProductService {
         // on purpose we do NOT touch "publisher" here. A product's owner
         // shouldn't be able to change with a simple update.
         return productRepository.save(existing);
-    
+
     }
 
     public boolean deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ProductNotFoundException(
-                "Producto no encontrado con id: " + id
+                    "Producto no encontrado con id: " + id
             );
         }
         productRepository.deleteById(id);

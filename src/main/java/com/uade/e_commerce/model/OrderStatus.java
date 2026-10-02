@@ -1,13 +1,11 @@
 package com.uade.e_commerce.model;
 
 /**
- * The lifecycle of an order. An order is born as PENDING and from there it
- * can only move forward along the flow, or be cancelled while it hasn't
- * been shipped yet:
+ * The lifecycle of an order. An order is born as PENDING and from there it can
+ * only move forward along the flow, or be cancelled while it hasn't been
+ * shipped yet:
  *
- * PENDING -> PAID -> SHIPPED -> DELIVERED
- *    |         |
- *    +---------+--> CANCELLED
+ * PENDING -> PAID -> SHIPPED -> DELIVERED | | +---------+--> CANCELLED
  *
  * DELIVERED and CANCELLED are final states: nothing comes after them.
  */
@@ -31,10 +29,14 @@ public enum OrderStatus {
         }
 
         return switch (this) {
-            case PENDING -> target == PAID || target == CANCELLED;
-            case PAID -> target == SHIPPED || target == CANCELLED;
-            case SHIPPED -> target == DELIVERED;
-            case DELIVERED, CANCELLED -> false;
+            case PENDING ->
+                target == PAID || target == CANCELLED;
+            case PAID ->
+                target == SHIPPED || target == CANCELLED;
+            case SHIPPED ->
+                target == DELIVERED;
+            case DELIVERED, CANCELLED ->
+                false;
         };
     }
 

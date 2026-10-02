@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductImageService {
+
     @Autowired
     private ProductImageRepository productImageRepository;
 
@@ -25,16 +26,16 @@ public class ProductImageService {
 
     @Transactional
     public ProductImageResponseDTO addImageToProduct(
-        Long productId,
-        ProductImageRequestDTO requestDTO
+            Long productId,
+            ProductImageRequestDTO requestDTO
     ) {
         Product product = productRepository
-            .findById(productId)
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " + productId
+                .findById(productId)
+                .orElseThrow(()
+                        -> new ProductNotFoundException(
+                        "Producto no encontrado con id: " + productId
                 )
-            );
+                );
 
         ProductImage productImage = new ProductImage();
         productImage.setUrl(requestDTO.getUrl());
@@ -49,16 +50,16 @@ public class ProductImageService {
     @Transactional
     public void deleteProductImage(Long productId, Long imageId) {
         ProductImage productImage = productImageRepository
-            .findById(imageId)
-            .orElseThrow(() ->
-                new ProductImageNotFoundException(
-                    "Imagen de producto no encontrada con id: " + imageId
+                .findById(imageId)
+                .orElseThrow(()
+                        -> new ProductImageNotFoundException(
+                        "Imagen de producto no encontrada con id: " + imageId
                 )
-            );
+                );
 
         if (!productImage.getProduct().getId().equals(productId)) {
             throw new IllegalArgumentException(
-                "La imagen de producto no pertenece al producto especificado"
+                    "La imagen de producto no pertenece al producto especificado"
             );
         }
 
@@ -68,12 +69,12 @@ public class ProductImageService {
     @Transactional(readOnly = true)
     public List<ProductImageResponseDTO> getImagesByProductId(Long productId) {
         productRepository
-            .findById(productId)
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " + productId
+                .findById(productId)
+                .orElseThrow(()
+                        -> new ProductNotFoundException(
+                        "Producto no encontrado con id: " + productId
                 )
-            );
+                );
 
         return productImageRepository.findByProductIdOrderByImageOrderAsc(productId)
                 .stream()

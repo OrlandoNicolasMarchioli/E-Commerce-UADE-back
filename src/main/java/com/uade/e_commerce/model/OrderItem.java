@@ -18,11 +18,10 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * One line of an order: which product was bought, how many units, and at
- * what price. Unlike CartItem, it doesn't read the price from Product: it
- * keeps its own copy, frozen at the moment of purchase.
+ * One line of an order: which product was bought, how many units, and at what
+ * price. Unlike CartItem, it doesn't read the price from Product: it keeps its
+ * own copy, frozen at the moment of purchase.
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

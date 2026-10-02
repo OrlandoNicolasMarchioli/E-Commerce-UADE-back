@@ -45,7 +45,6 @@ public class Product {
     // EnumType.STRING stores "PHYSICAL"/"SERVICE" as text in the database,
     // instead of 0/1. That way, if we add a third type down the line, the
     // already-saved data doesn't break (it would with ORDINAL).
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductType type;
