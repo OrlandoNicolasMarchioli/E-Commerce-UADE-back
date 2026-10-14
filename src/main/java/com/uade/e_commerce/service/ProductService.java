@@ -1,3 +1,4 @@
+
 package com.uade.e_commerce.service;
 
 import java.math.BigDecimal;
@@ -5,10 +6,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.uade.e_commerce.dto.product.ProductRequestDTO;
+import com.uade.e_commerce.dto.product.ProductResponseDTO;
+import com.uade.e_commerce.exception.CategoryNotFoundException;
 import com.uade.e_commerce.exception.NegativePriceException;
 import com.uade.e_commerce.exception.ProductNotFoundException;
+import com.uade.e_commerce.exception.UserNotFoundException;
+import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.model.Product;
+import com.uade.e_commerce.model.User;
+import com.uade.e_commerce.repository.CategoryRepository;
 import com.uade.e_commerce.repository.ProductRepository;
+import com.uade.e_commerce.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -17,79 +26,129 @@ import jakarta.transaction.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(
+            ProductRepository productRepository,
+            CategoryRepository categoryRepository,
+            UserRepository userRepository) {
+
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
     }
 
-    public List<Product> getAllProducts() {
-        // select * from products
-        return productRepository.findAllByOrderByNameAsc();
+    public List<ProductResponseDTO> getAllProducts() {
+        return productRepository.findAllByOrderByNameAsc()
+                .stream()
+                .map(ProductResponseDTO::fromEntity)
+                .toList();
     }
 
-    public List<Product> getProductsByCategory(Long categoryId) {
-    return productRepository.findByCategoryId(categoryId);
-
+    public List<ProductResponseDTO> getProductsByCategory(Long categoryId) {
+        return productRepository.findByCategoryId(categoryId)
+                .stream()
+                .map(ProductResponseDTO::fromEntity)
+                .toList();
     }
 
-    public Product getProductById(Long id) {
-        return productRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " + id
-                )
-            );
+    public ProductResponseDTO getProductById(Long id) {
+        return ProductResponseDTO.fromEntity(findProductById(id));
     }
 
-    public Product createProduct(Product product) {
-        // compareTo and not equals: BigDecimal.equals also compares the
-        // scale, so 0.00 wouldn't be equal to 0.
-        if (product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new NegativePriceException();
-        }
+    public ProductResponseDTO createProduct(
+            ProductRequestDTO dto,
+            Long publisherId) {
 
-        return productRepository.save(product);
+        validatePrice(dto.getPrice());
+
+        // Relationships are resolved here so the controller never
+        // needs to retrieve or manipulate JPA entities.
+        Category category = findCategoryById(dto.getCategoryId());
+        User publisher = findUserById(publisherId);
+
+        Product product = dto.toEntity();
+        product.setCategory(category);
+        product.setPublisher(publisher);
+
+        Product saved = productRepository.save(product);
+
+        return ProductResponseDTO.fromEntity(saved);
     }
 
-    public Product updateProduct(Long id, Product product) {
-        Product existing = productRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new ProductNotFoundException(
-                    "Producto no encontrado con id: " + id
-                )
-            );
+    public ProductResponseDTO updateProduct(
+            Long id,
+            ProductRequestDTO dto) {
 
-        if (product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new NegativePriceException();
-        }
+        Product existing = findProductById(id);
 
-        // We update field by field (instead of replacing the whole entity)
-        // so we don't lose the id or the original publisher.
-        existing.setName(product.getName());
-        existing.setDescription(product.getDescription());
-        existing.setPrice(product.getPrice());
-        existing.setType(product.getType());
-        existing.setStock(product.getStock());
-        existing.setMinutesDuration(product.getMinutesDuration());
-        existing.setAttendanceType(product.getAttendanceType());
-        existing.setCategory(product.getCategory());
+        validatePrice(dto.getPrice());
 
-        // on purpose we do NOT touch "publisher" here. A product's owner
-        // shouldn't be able to change with a simple update.
-        return productRepository.save(existing);
-    
+        Category category = findCategoryById(dto.getCategoryId());
+
+        // Updating the existing entity preserves its identity
+        // and the relationships that cannot be modified by this request.
+        existing.setName(dto.getName());
+        existing.setDescription(dto.getDescription());
+        existing.setPrice(dto.getPrice());
+        existing.setType(dto.getType());
+        existing.setStock(dto.getStock());
+        existing.setMinutesDuration(dto.getMinutesDuration());
+        existing.setAttendanceType(dto.getAttendanceType());
+        existing.setCategory(category);
+
+        // The original publisher must remain unchanged.
+        Product updated = productRepository.save(existing);
+
+        return ProductResponseDTO.fromEntity(updated);
     }
 
     public boolean deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ProductNotFoundException(
-                "Producto no encontrado con id: " + id
+                    "Producto no encontrado con id: " + id
             );
         }
+
         productRepository.deleteById(id);
         return true;
     }
 
+    private Product findProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Producto no encontrado con id: " + id
+                        )
+                );
+    }
+
+    private Category findCategoryById(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new CategoryNotFoundException(id)
+                );
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException(id)
+                );
+    }
+
+    private void validatePrice(BigDecimal price) {
+        if (price == null) {
+            throw new IllegalArgumentException(
+                    "El precio es obligatorio"
+            );
+        }
+
+        // compareTo ignores BigDecimal scale, unlike equals.
+        // Values such as 0 and 0.00 are treated consistently.
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new NegativePriceException();
+        }
+    }
 }

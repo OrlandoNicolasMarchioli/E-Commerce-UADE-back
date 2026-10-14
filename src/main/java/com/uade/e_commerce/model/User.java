@@ -17,11 +17,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -47,35 +49,48 @@ public class User implements UserDetails {
 
     private String regNumber;
 
+    // Builder.Default preserves the same values used by the no-args
+    // constructor when a new user is created through the builder.
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime registrationDate = LocalDateTime.now();
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean isEnabled = true;
 
+    // New accounts receive the USER role unless explicitly assigned
+    // another role by trusted application logic.
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
     private Role role = Role.USER;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return List.of(
+                new SimpleGrantedAuthority("ROLE_" + role.name())
+        );
     }
 
-    // email is the login identifier
+    // Email is used as the authentication identifier.
     @Override
     public String getUsername() {
         return email;
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    // isEnabled() is satisfied by Lombok's getter for the isEnabled field
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 }

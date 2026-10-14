@@ -1,3 +1,4 @@
+
 package com.uade.e_commerce.service;
 
 import java.util.List;
@@ -5,8 +6,10 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.uade.e_commerce.exception.UserNotFoundException;
+import com.uade.e_commerce.dto.user.UserRequestDTO;
+import com.uade.e_commerce.dto.user.UserResponseDTO;
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
+import com.uade.e_commerce.exception.UserNotFoundException;
 import com.uade.e_commerce.model.User;
 import com.uade.e_commerce.repository.UserRepository;
 
@@ -19,63 +22,73 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponseDTO::fromEntity)
+                .toList();
     }
 
-    public User getUserById(Long id) {
-        return userRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new UserNotFoundException("Usuario no encontrado con id: " + id)
-            );
+    public UserResponseDTO getUserById(Long id) {
+        User user = findUserById(id);
+        return UserResponseDTO.fromEntity(user);
     }
 
-    public User updateUser(Long id, User user) {
-        User existingUser = userRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new UserNotFoundException("Usuario no encontrado con id: " + id)
+    public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
+        User existingUser = findUserById(id);
+
+        // Keeping the current email is valid when updating other fields.
+        // Only a different email needs a uniqueness check.
+        if (!existingUser.getEmail().equals(dto.getEmail())
+                && userRepository.existsByEmail(dto.getEmail())) {
+            throw new EmailAlreadyExistsException(dto.getEmail());
+        }
+
+        existingUser.setFirstName(dto.getFirstName());
+        existingUser.setLastName(dto.getLastName());
+        existingUser.setEmail(dto.getEmail());
+        existingUser.setRegNumber(dto.getRegNumber());
+
+        // An omitted or blank password must not replace the stored hash.
+        // A new password is encoded before the entity is persisted.
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            existingUser.setPassword(
+                    passwordEncoder.encode(dto.getPassword())
             );
-
-        // We compare against the current email so we don't reject an update
-        // that sends the same email as always, which is normal when only
-        // the name is being edited.
-        if (!existingUser.getEmail().equals(user.getEmail())
-                && userRepository.existsByEmail(user.getEmail())) {
-            throw new EmailAlreadyExistsException(user.getEmail());
         }
 
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setEmail(user.getEmail());
+        // Role and account status are intentionally not modified.
+        // They are not editable through UserRequestDTO.
+        User updated = userRepository.save(existingUser);
 
-        // Before, it was always overwritten, so an update without a
-        // password left the user with a null password and unable to ever
-        // log in again.
-        if (user.getPassword() != null && !user.getPassword().isBlank()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-
-        existingUser.setRegNumber(user.getRegNumber());
-        existingUser.setEnabled(user.isEnabled());
-
-        return userRepository.save(existingUser);
+        return UserResponseDTO.fromEntity(updated);
     }
 
     public boolean deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException(
-                "Usuario no encontrado con id: " + id
+                    "Usuario no encontrado con id: " + id
             );
         }
+
         userRepository.deleteById(id);
         return true;
     }
 
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException(
+                                "Usuario no encontrado con id: " + id
+                        )
+                );
+    }
 }

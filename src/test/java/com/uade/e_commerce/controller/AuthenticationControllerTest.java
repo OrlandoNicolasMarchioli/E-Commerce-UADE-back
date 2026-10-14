@@ -16,6 +16,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.uade.e_commerce.dto.user.AuthResponseDTO;
+import com.uade.e_commerce.dto.user.LoginRequestDTO;
+import com.uade.e_commerce.dto.user.RegisterRequestDTO;
+import com.uade.e_commerce.dto.user.UserResponseDTO;
 import com.uade.e_commerce.exception.EmailAlreadyExistsException;
 import com.uade.e_commerce.exception.InvalidCredentialsException;
 import com.uade.e_commerce.model.Role;
@@ -39,17 +43,42 @@ class AuthenticationControllerTest {
     private UserDetailsService userDetailsService;
 
     private User buildUser() {
-        return new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1", LocalDateTime.now(), true, Role.USER);
+        return new User(
+                1L,
+                "Ada",
+                "Lovelace",
+                "ada@test.com",
+                "hash",
+                "L1",
+                LocalDateTime.now(),
+                true,
+                Role.USER
+        );
+    }
+
+    private AuthResponseDTO buildAuthResponse() {
+        return new AuthResponseDTO(
+                "test-token",
+                UserResponseDTO.fromEntity(buildUser())
+        );
     }
 
     @Test
     void register_validData_returnsOk() throws Exception {
-        when(authenticationService.register(any(User.class))).thenReturn(buildUser());
-        when(jwtService.generateToken(any())).thenReturn("test-token");
+
+        when(authenticationService.register(any(RegisterRequestDTO.class)))
+                .thenReturn(buildAuthResponse());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\":\"Ada\",\"lastName\":\"Lovelace\",\"email\":\"ada@test.com\",\"password\":\"secret\"}"))
+                        .content("""
+                                {
+                                    "firstName": "Ada",
+                                    "lastName": "Lovelace",
+                                    "email": "ada@test.com",
+                                    "password": "secret"
+                                }
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("test-token"))
                 .andExpect(jsonPath("$.user.email").value("ada@test.com"));
@@ -57,24 +86,37 @@ class AuthenticationControllerTest {
 
     @Test
     void register_emailAlreadyExists_returns409() throws Exception {
-        when(authenticationService.register(any(User.class)))
+
+        when(authenticationService.register(any(RegisterRequestDTO.class)))
                 .thenThrow(new EmailAlreadyExistsException("ada@test.com"));
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\":\"Ada\",\"email\":\"ada@test.com\",\"password\":\"secret\"}"))
+                        .content("""
+                                {
+                                    "firstName": "Ada",
+                                    "email": "ada@test.com",
+                                    "password": "secret"
+                                }
+                                """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409));
     }
 
     @Test
     void login_validCredentials_returnsOk() throws Exception {
-        when(authenticationService.authenticate("ada@test.com", "secret")).thenReturn(buildUser());
-        when(jwtService.generateToken(any())).thenReturn("test-token");
+
+        when(authenticationService.authenticate(any(LoginRequestDTO.class)))
+                .thenReturn(buildAuthResponse());
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"ada@test.com\",\"password\":\"secret\"}"))
+                        .content("""
+                                {
+                                    "email": "ada@test.com",
+                                    "password": "secret"
+                                }
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("test-token"))
                 .andExpect(jsonPath("$.user.email").value("ada@test.com"));
@@ -82,12 +124,18 @@ class AuthenticationControllerTest {
 
     @Test
     void login_invalidCredentials_returns401() throws Exception {
-        when(authenticationService.authenticate("ada@test.com", "wrong"))
+
+        when(authenticationService.authenticate(any(LoginRequestDTO.class)))
                 .thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"ada@test.com\",\"password\":\"wrong\"}"))
+                        .content("""
+                                {
+                                    "email": "ada@test.com",
+                                    "password": "wrong"
+                                }
+                                """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
     }

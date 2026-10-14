@@ -1,3 +1,4 @@
+
 package com.uade.e_commerce.controller.category;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -22,8 +23,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.uade.e_commerce.dto.category.CategoryRequestDTO;
+import com.uade.e_commerce.dto.category.CategoryResponseDTO;
 import com.uade.e_commerce.exception.CategoryNotFoundException;
-import com.uade.e_commerce.model.Category;
 import com.uade.e_commerce.security.JwtService;
 import com.uade.e_commerce.service.CategoryService;
 
@@ -44,7 +46,8 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_returnsList() throws Exception {
-        when(categoryService.getAllCategories()).thenReturn(List.of(new Category(1L, "Cursos", "desc")));
+        when(categoryService.getAllCategories())
+                .thenReturn(List.of(new CategoryResponseDTO(1L, "Cursos")));
 
         mockMvc.perform(get("/api/category"))
                 .andExpect(status().isOk())
@@ -54,7 +57,8 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById_found_returnsOk() throws Exception {
-        when(categoryService.getCategoryById(1L)).thenReturn(new Category(1L, "Cursos", "desc"));
+        when(categoryService.getCategoryDetails(1L))
+                .thenReturn(new CategoryResponseDTO(1L, "Cursos"));
 
         mockMvc.perform(get("/api/category/1"))
                 .andExpect(status().isOk())
@@ -64,7 +68,8 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById_notFound_returns404() throws Exception {
-        when(categoryService.getCategoryById(99L)).thenThrow(new CategoryNotFoundException(99L));
+        when(categoryService.getCategoryDetails(99L))
+                .thenThrow(new CategoryNotFoundException(99L));
 
         mockMvc.perform(get("/api/category/99"))
                 .andExpect(status().isNotFound());
@@ -73,20 +78,24 @@ class CategoryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void createCategory_returnsCreatedCategory() throws Exception {
-        when(categoryService.createCategory(any(Category.class))).thenReturn(new Category(1L, "Cursos", null));
+        when(categoryService.createCategory(any(CategoryRequestDTO.class)))
+                .thenReturn(new CategoryResponseDTO(1L, "Cursos"));
 
         mockMvc.perform(post("/api/category")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Cursos\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Cursos"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateCategory_found_returnsOk() throws Exception {
-        when(categoryService.updateCategory(eq(1L), any(Category.class)))
-                .thenReturn(new Category(1L, "Nuevo nombre", null));
+        when(categoryService.updateCategory(
+                eq(1L),
+                any(CategoryRequestDTO.class)
+        )).thenReturn(new CategoryResponseDTO(1L, "Nuevo nombre"));
 
         mockMvc.perform(put("/api/category/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,8 +107,10 @@ class CategoryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateCategory_notFound_returns404() throws Exception {
-        when(categoryService.updateCategory(eq(99L), any(Category.class)))
-                .thenThrow(new CategoryNotFoundException(99L));
+        when(categoryService.updateCategory(
+                eq(99L),
+                any(CategoryRequestDTO.class)
+        )).thenThrow(new CategoryNotFoundException(99L));
 
         mockMvc.perform(put("/api/category/99")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +130,8 @@ class CategoryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void deleteCategory_notFound_returns404() throws Exception {
-        when(categoryService.deleteCategory(99L)).thenThrow(new CategoryNotFoundException(99L));
+        when(categoryService.deleteCategory(99L))
+                .thenThrow(new CategoryNotFoundException(99L));
 
         mockMvc.perform(delete("/api/category/99"))
                 .andExpect(status().isNotFound());
