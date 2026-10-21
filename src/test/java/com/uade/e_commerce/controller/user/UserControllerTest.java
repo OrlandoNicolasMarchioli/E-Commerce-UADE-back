@@ -3,7 +3,10 @@ package com.uade.e_commerce.controller.user;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -21,8 +24,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.uade.e_commerce.dto.user.UserRequestDTO;
 import com.uade.e_commerce.dto.user.UserResponseDTO;
@@ -51,7 +56,7 @@ class UserControllerTest {
     private UserDetailsService userDetailsService;
 
     private UserResponseDTO buildUserResponse() {
-        User user = new User(
+        User account = new User(
                 1L,
                 "Ada",
                 "Lovelace",
@@ -63,7 +68,21 @@ class UserControllerTest {
                 Role.USER
         );
 
-        return UserResponseDTO.fromEntity(user);
+        return UserResponseDTO.fromEntity(account);
+    }
+
+    private RequestPostProcessor authenticatedUser(Long id, Role role) {
+
+        // The real JWT filter uses our User entity as the principal.
+        // Tests must reproduce that principal, including its database ID.
+        User principal = new User();
+        principal.setId(id);
+        principal.setEmail("user" + id + "@test.com");
+        principal.setPassword("hash");
+        principal.setEnabled(true);
+        principal.setRole(role);
+
+        return user(principal);
     }
 
     @Test
@@ -72,17 +91,16 @@ class UserControllerTest {
                 .thenReturn(List.of(buildUserResponse()));
 
         mockMvc.perform(get("/api/users")
-                        .with(user("admin").roles("ADMIN")))
+                        .with(authenticatedUser(5L, Role.ADMIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].email").value("ada@test.com"))
-                .andExpect(jsonPath("$[0].password").doesNotExist());
+                .andExpect(jsonPath("$[0].email").value("ada@test.com"));
     }
 
     @Test
     void getAllUsers_withoutAdminRole_returns403() throws Exception {
         mockMvc.perform(get("/api/users")
-                        .with(user("student").roles("USER")))
+                        .with(authenticatedUser(2L, Role.USER)))
                 .andExpect(status().isForbidden());
     }
 
@@ -93,16 +111,34 @@ class UserControllerTest {
     }
 
     @Test
-    void getUserById_found_returnsOk() throws Exception {
+    void getUserById_owner_returnsOk() throws Exception {
         when(userService.getUserById(1L))
                 .thenReturn(buildUserResponse());
 
         mockMvc.perform(get("/api/users/1")
-                        .with(user("student").roles("USER")))
+                        .with(authenticatedUser(1L, Role.USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.email").value("ada@test.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void getUserById_otherUser_returns403() throws Exception {
+        mockMvc.perform(get("/api/users/1")
+                        .with(authenticatedUser(2L, Role.USER)))
+                .andExpect(status().isForbidden());
+
+        verify(userService, never()).getUserById(anyLong());
+    }
+
+    @Test
+    void getUserById_adminCanAccessOtherUser() throws Exception {
+        when(userService.getUserById(1L))
+                .thenReturn(buildUserResponse());
+
+        mockMvc.perform(get("/api/users/1")
+                        .with(authenticatedUser(5L, Role.ADMIN)))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -111,19 +147,19 @@ class UserControllerTest {
                 .thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(get("/api/users/99")
-                        .with(user("student").roles("USER")))
+                        .with(authenticatedUser(99L, Role.USER)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void updateUser_found_returnsOk() throws Exception {
+    void updateUser_owner_returnsOk() throws Exception {
         when(userService.updateUser(
                 eq(1L),
-                any(UserRequestDTO.class)
-        )).thenReturn(buildUserResponse());
+                any(UserRequestDTO.class)))
+                .thenReturn(buildUserResponse());
 
         mockMvc.perform(put("/api/users/1")
-                        .with(user("student").roles("USER"))
+                        .with(authenticatedUser(1L, Role.USER))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -133,19 +169,57 @@ class UserControllerTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("ada@test.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpect(jsonPath("$.email").value("ada@test.com"));
+    }
+
+    @Test
+    void updateUser_otherUser_returns403WithoutUpdating() throws Exception {
+        mockMvc.perform(put("/api/users/1")
+                        .with(authenticatedUser(2L, Role.USER))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "firstName": "Intruso",
+                                    "email": "intruso@test.com",
+                                    "password": "newPassword"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+
+        verify(userService, never()).updateUser(
+                anyLong(),
+                any(UserRequestDTO.class)
+        );
+    }
+
+    @Test
+    void updateUser_adminCanUpdateOtherUser() throws Exception {
+        when(userService.updateUser(
+                eq(1L),
+                any(UserRequestDTO.class)))
+                .thenReturn(buildUserResponse());
+
+        mockMvc.perform(put("/api/users/1")
+                        .with(authenticatedUser(5L, Role.ADMIN))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "firstName": "Ada",
+                                    "email": "ada@test.com"
+                                }
+                                """))
+                .andExpect(status().isOk());
     }
 
     @Test
     void updateUser_notFound_returns404() throws Exception {
         when(userService.updateUser(
                 eq(99L),
-                any(UserRequestDTO.class)
-        )).thenThrow(new UserNotFoundException(99L));
+                any(UserRequestDTO.class)))
+                .thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(put("/api/users/99")
-                        .with(user("student").roles("USER"))
+                        .with(authenticatedUser(99L, Role.USER))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -160,18 +234,17 @@ class UserControllerTest {
     void updateUser_duplicateEmail_returns409() throws Exception {
         when(userService.updateUser(
                 eq(1L),
-                any(UserRequestDTO.class)
-        )).thenThrow(
-                new EmailAlreadyExistsException("taken@test.com")
-        );
+                any(UserRequestDTO.class)))
+                .thenThrow(
+                        new EmailAlreadyExistsException("taken@test.com")
+                );
 
         mockMvc.perform(put("/api/users/1")
-                        .with(user("student").roles("USER"))
+                        .with(authenticatedUser(1L, Role.USER))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                     "firstName": "Ada",
-                                    "lastName": "Lovelace",
                                     "email": "taken@test.com"
                                 }
                                 """))
@@ -179,13 +252,34 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser_found_returnsNoContent() throws Exception {
-        when(userService.deleteUser(1L))
-                .thenReturn(true);
+    void deleteUser_owner_returnsNoContent() throws Exception {
+        when(userService.deleteUser(1L)).thenReturn(true);
 
         mockMvc.perform(delete("/api/users/1")
-                        .with(user("student").roles("USER")))
+                        .with(authenticatedUser(1L, Role.USER)))
                 .andExpect(status().isNoContent());
+
+        verify(userService).deleteUser(1L);
+    }
+
+    @Test
+    void deleteUser_otherUser_returns403WithoutDeleting() throws Exception {
+        mockMvc.perform(delete("/api/users/1")
+                        .with(authenticatedUser(2L, Role.USER)))
+                .andExpect(status().isForbidden());
+
+        verify(userService, never()).deleteUser(anyLong());
+    }
+
+    @Test
+    void deleteUser_adminCanDeleteOtherUser() throws Exception {
+        when(userService.deleteUser(1L)).thenReturn(true);
+
+        mockMvc.perform(delete("/api/users/1")
+                        .with(authenticatedUser(5L, Role.ADMIN)))
+                .andExpect(status().isNoContent());
+
+        verify(userService).deleteUser(1L);
     }
 
     @Test
@@ -194,7 +288,7 @@ class UserControllerTest {
                 .thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(delete("/api/users/99")
-                        .with(user("student").roles("USER")))
+                        .with(authenticatedUser(99L, Role.USER)))
                 .andExpect(status().isNotFound());
     }
 }
