@@ -20,9 +20,9 @@ class UserResponseDTOTest {
     @Autowired
     private JsonMapper jsonMapper;
 
-    private User buildUser(boolean enabled) {
+    private User buildUser(boolean enabled, Role role) {
         return new User(1L, "Ada", "Lovelace", "ada@test.com", "hash", "L1",
-                LocalDateTime.of(2026, 8, 1, 9, 0), enabled, Role.USER);
+                LocalDateTime.of(2026, 8, 1, 9, 0), enabled, role);
     }
 
     @SuppressWarnings("unchecked")
@@ -33,9 +33,25 @@ class UserResponseDTOTest {
 
     @Test
     void fromEntity_serializesEnabledFlagAsIsEnabled() {
-        Map<String, Object> json = toJson(buildUser(false));
+        Map<String, Object> json = toJson(buildUser(false, Role.USER));
 
         assertThat(json).containsEntry("isEnabled", false);
         assertThat(json).doesNotContainKey("IsEnabled");
+    }
+
+    @Test
+    void fromEntity_includesTheUserRole() {
+        Map<String, Object> json = toJson(buildUser(true, Role.ADMIN));
+
+        assertThat(json).containsEntry("role", "ADMIN");
+    }
+
+    @Test
+    void fromEntity_serializesExactlyTheContractFields() {
+        Map<String, Object> json = toJson(buildUser(true, Role.USER));
+
+        assertThat(json.keySet()).containsExactlyInAnyOrder(
+                "id", "firstName", "lastName", "email", "regNumber",
+                "registrationDate", "isEnabled", "role");
     }
 }
