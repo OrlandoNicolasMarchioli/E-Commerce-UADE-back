@@ -2,6 +2,8 @@ package com.uade.e_commerce.dto.user;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.uade.e_commerce.model.Role;
 import com.uade.e_commerce.model.User;
 
 import lombok.AllArgsConstructor;
@@ -19,7 +21,10 @@ public class UserResponseDTO {
     private String email;
     private String regNumber; // student id number
     private LocalDateTime registrationDate;
+    // without it, Jackson 3 keeps the field name and writes "IsEnabled"
+    @JsonProperty("isEnabled")
     private boolean IsEnabled;
+    private Role role;
 
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
@@ -29,6 +34,7 @@ public class UserResponseDTO {
                 user.getEmail(),
                 user.getRegNumber(),
                 user.getRegistrationDate(),
-                user.isEnabled());
+                user.isEnabled(),
+                user.getRole());
     }
 }
