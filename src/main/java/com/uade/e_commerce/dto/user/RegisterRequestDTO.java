@@ -6,10 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// Right now it has the same fields as UserRequestDTO, but it's kept
-// separate because signing up and editing a user don't necessarily need to
-// ask for the same thing: when validations get added, the registration
-// ones go here without affecting the PUT on /api/users.
+// Registration has its own DTO so its requirements can evolve
+// independently from the administrative user update endpoint.
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,15 +17,19 @@ public class RegisterRequestDTO {
     private String lastName;
     private String email;
     private String password;
-    private String regNumber; // student id number
+    private String regNumber;
 
     public User toEntity() {
-        User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setRegNumber(regNumber);
-        return user;
+
+        // Only registration fields are accepted from the client.
+        // The role, account status and registration date retain
+        // the defaults defined by the User model.
+        return User.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .password(password)
+                .regNumber(regNumber)
+                .build();
     }
 }
